@@ -4,8 +4,8 @@ use 5.6.0;
 use strict;
 use Carp;
 
-our $RCSID = q$Id: File.pm,v 0.65 2003/01/19 17:52:27 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 0.65 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: File.pm,v 0.66 2003/04/09 08:33:06 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.66 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Exporter;
 require DynaLoader;
@@ -100,7 +100,8 @@ MacOSX::File::Constants for details.
 
 =head1 INSTALLATION
 
-To install this module type the following:
+To install this module, first make sure Developer kit is
+installed.  Then type the following:
 
    perl Makefile.PL
    make
@@ -114,7 +115,7 @@ install".
 
 =head1 COPYRIGHT AND LICENCE
 
-Copyright 2002 Dan Kogai <dankogai@dan.co.jp>
+Copyright 2002-2003 Dan Kogai <dankogai@dan.co.jp>
 
 This library is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.

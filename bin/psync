@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $Id: psync,v 0.64 2002/10/27 16:43:23 dankogai Exp $
+# $Id: psync,v 0.65 2003/04/09 08:25:26 dankogai Exp $
 #
 
 use strict;
@@ -221,11 +221,11 @@ if ($opt_r >= 2){
 sub copyattrib{
     my ($spath, $dpath, $mode, $uid, $gid, $atime, $mtime) = @_;
     my $finfo = getfinfo($spath);
-    $finfo and $finfo->set($dpath);
     unless ($opt_r > 1){
 	chmod $mode & 07777, $dpath;
 	chown $uid,   $gid,  $dpath;
     }
+    $finfo and $finfo->set($dpath);
     utime $atime, $mtime,  $dpath;
 }
 

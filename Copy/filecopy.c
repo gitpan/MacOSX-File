@@ -1,5 +1,5 @@
 /*
- * $Id: filecopy.c,v 0.64 2002/10/27 16:43:23 dankogai Exp $
+ * $Id: filecopy.c,v 0.65 2003/04/09 08:25:26 dankogai Exp $
  */
 
 #include <Files.h>
@@ -22,22 +22,31 @@ setcopyerr(int err, char *filename, int line)
 
 static UniCharCount 
 Utf8toUni(UInt8 *src, UniChar *dst){
-    UniChar       ucs2;
-    UInt8         c1, c2, c3;
+    UInt32        utf32;
+    UInt8         c1, c2, c3, c4;
     UniCharCount  nchar = 0;
 
     for(; *src != '\0'; src++, nchar++){
 	if (*src < 0x80) {     /* 1 byte */
-	    ucs2 = *src;
-	}
-	else if (*src < 0xE0){ /* 2 bytes */
+	    utf32 = *src;
+	}else if (*src < 0xE0){ /* 2 bytes */
 	    c1 = *src++; c2 = *src;
-	    ucs2 = ((c1 & 0x1F) << 6) | (c2 & 0x3F);
-	}else{                 /* 3 bytes */
+	    utf32 = ((c1 & 0x1F) << 6) | (c2 & 0x3F);
+	}else if (*src < 0xF0){                 /* 3 bytes */
 	    c1 = *src++; c2 = *src++; c3 = *src;
-	    ucs2 = ((c1 & 0x0F) << 12) | ((c2 & 0x3F) << 6)| (c3 & 0x3F);
+	    utf32 = ((c1 & 0x0F) << 12) | ((c2 & 0x3F) << 6)| (c3 & 0x3F);
+	}else{
+	    c1 = *src++; c2 = *src++; c3 = *src++; c4 = *src;
+	    utf32 = ((c1 & 0x07) << 16) | 
+		((c2 & 0x3F) << 12)| ((c3 & 0x3F) << 6) | (c4 & 0x3F);
 	}
-	*dst++ = ucs2;
+	if (utf32 <= 0xffff){
+	    *dst++ = (utf32 & 0xffff);
+	}else{ /* ensurrogate */
+	    *dst++ = ((utf32 - 0x10000) >> 10)   + 0xD800;
+	    *dst++ = ((utf32 - 0x10000) & 0x3FF) + 0xDC00;
+	    nchar++;
+	}
     }
     return nchar;
 }
