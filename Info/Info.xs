@@ -1,5 +1,5 @@
 /*
- * $Id: Info.xs,v 0.60 2002/01/27 16:43:19 dankogai Exp dankogai $
+ * $Id: Info.xs,v 0.61 2002/01/28 07:43:59 dankogai Exp dankogai $
  */
 
 #include "EXTERN.h"
@@ -88,8 +88,8 @@ xs_setfinfo(
     FSSpec Spec;
     FSCatalogInfo Catalog;
     FInfo  *finfo = (FInfo *)(&Catalog.finderInfo);
-
     OSErr err;
+
     if (path != NULL && strlen(path) != 0){
 	if (err = FSPathMakeRef(path, &Ref, NULL)){
 	    return seterr(err);
@@ -101,7 +101,7 @@ xs_setfinfo(
     }
 
     /* prefetch destination catalog; may be used for file locks */
-    if (err = FSGetCatalogInfo(&Ref,
+    if (err = FSGetCatalogInfo(rp,
 			       kFSCatInfoSettableInfo|kFSCatInfoNodeFlags,
 			       &Catalog,
 			       NULL, NULL, NULL))

@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.xs,v 0.60 2002/01/27 16:43:17 dankogai Exp dankogai $
+ * $Id: Catalog.xs,v 0.61 2002/01/28 07:43:58 dankogai Exp dankogai $
  */
 
 #include "EXTERN.h"
@@ -135,7 +135,7 @@ xs_setcatalog(SV* self, char *path){
     }
 
     /* prefetch destination catalog; may be used for file locks */
-    if (err = FSGetCatalogInfo(&Ref,
+    if (err = FSGetCatalogInfo(rp,
 			       kFSCatInfoSettableInfo|kFSCatInfoNodeFlags,
 			       &Catalog,
 			       NULL, NULL, NULL))

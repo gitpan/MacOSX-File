@@ -1,6 +1,9 @@
 #
-# $Id: Changes,v 0.60 2002/01/27 16:43:18 dankogai Exp dankogai $
+# $Id: Changes,v 0.61 2002/01/28 07:43:58 dankogai Exp dankogai $
 #
+0.61  2002.01.28
+      ! Info/Info.xs Catalog/Catalog.xs
+       * $obj->set() without argument failed
 0.60  2002.01.28
       ! */*.xs
         * (data|rsrc)(Logical|Physical)size is now NV instead of IV
