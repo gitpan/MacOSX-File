@@ -27,8 +27,8 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Catalog.pm,v 0.30 2002/01/12 20:30:25 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Catalog.pm,v 0.41 2002/01/14 00:32:28 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.41 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Exporter;
 require DynaLoader;
@@ -335,12 +335,13 @@ fields untouched.
 eg) $catalog->finderInfo('TEXT', 'ttxt')
     # changes type and creator with flags and others unchanged
 
-=item ($uid, $gid, $mode, $reserved) = $catalog->permissions(...)
+=item ($uid, $gid, $mode, $specialDevice) = $catalog->permissions(...)
 
 returns 4-element list whose values are UID, GID, MODE there of. 
 
-CAUTION: The last one seems reserved but there was no document
-avaiable from Apple.
+SEE
+L<http://developer.apple.com/technotes/tn/tn1150.html#HFSPlusPermissions>
+for the use of this field. 
 
 =item ($type, $creator, $flags, $location, $fdfldr) = $catalog->finderInfo(...)
 

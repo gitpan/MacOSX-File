@@ -1,6 +1,16 @@
 #
-# $Id: Changes,v 0.30 2002/01/12 20:30:25 dankogai Exp dankogai $
+# $Id: Changes,v 0.41 2002/01/14 00:32:28 dankogai Exp dankogai $
 #
+0.41  2002.01.13
+      * documention
+      * verious fixes
+0.40  2002.01.13
+      - MoreFiles/*
+        MacOSX::File now implements its own, FSSpec-free file
+	copy function so MoreFiles is gone!
+      + bin/pcpmac
+      + bin/pmvmac
+      * various bugfixes
 0.30  2002.01.13
       + bin/pgetfinfo
       + bin/pgetfinfo

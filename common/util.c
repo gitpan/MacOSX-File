@@ -1,10 +1,14 @@
 /*
- * $Id: util.c,v 0.30 2002/01/12 20:30:26 dankogai Exp dankogai $
+ * $Id: util.c,v 0.41 2002/01/14 00:32:30 dankogai Exp dankogai $
  */
+
+#ifndef _INC_UTIL_C_
+# define _INC_UTIL_C_
 
 #include <sys/param.h>
 #include <Files.h>
 
+#ifdef _INC_PERL_XSUB_H
 static int
 seterr(int err)
 {
@@ -15,8 +19,29 @@ seterr(int err)
     }
     return err;
 }
+#endif /* _INC_PERL_XSUB_H */
 
 #define  char2OSType(s) (OSType)(s[0]<<24|s[1]<<16|s[2]<<8|s[3])
+
+
+/*
+ * unlike pure-Carbonated functions,
+ * MoreFiles functions hate colons in thier name field
+ * in FSSpec that are fed as arguments.  There must be
+ * replaced to '/'.  Then Darwin make it look like they
+ * are colons (sigh).
+ * So we define this function just for Copy.xs
+ *
+ */
+
+static char *
+colon2slash(char *str){
+    char *p;
+    for(p = str; *p != '\0'; p++){
+	if (*p == ':') *p = '/';
+    }
+    return str;
+}
 
 static char *
 dirname(char *path){
@@ -57,3 +82,6 @@ str2pstr(unsigned char *str, unsigned char *pstr){
 }
 
 #define FSRef2FSSpec(r, s) FSGetCatalogInfo((r),kFSCatInfoNone,NULL,NULL,(s),NULL)
+
+#endif /* _INC_UTIL_C_ */
+

@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 0.30 2002/01/12 20:30:26 dankogai Exp dankogai $
+# $Id: Makefile.PL,v 0.41 2002/01/14 00:32:29 dankogai Exp dankogai $
 #
 
 $^O =~ /darwin/o or die "$^O is not darwin!";
@@ -9,17 +9,12 @@ use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
-makemorefiles();
+# makemorefiles();
 
-sub makemorefiles{
-    warn "-- Making MoreFiles a priori\n";
-    chdir 'MoreFiles';
-    system 'make';
-    chdir '..';
-    warn "-- Making MoreFiles: done\n";
-}
-
-@EXE = qw(pgetfinfo);
+@EXE = qw(pgetfinfo 	 
+	  psetfinfo
+	  pcpmac
+	  pmvmac);
 
 WriteMakefile
     (
@@ -31,3 +26,12 @@ WriteMakefile
       (ABSTRACT_FROM => 'File.pm', # retrieve abstract from module
        AUTHOR     => 'Dan Kogai <dankogai@dan.co.jp>') : ()),
 );
+
+sub makemorefiles{
+    warn "-- Making MoreFiles a priori\n";
+    chdir 'MoreFiles';
+    system 'make';
+    chdir '..';
+    warn "-- Making MoreFiles: done\n";
+}
+
