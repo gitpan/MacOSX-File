@@ -74,7 +74,7 @@ sub do_copy{
 	mkdir $dst,0777 or die "$dst:$!";
 	opendir my $d, $src or die "$src:$!";
 	# see ._* is avoided
-	my @f = grep !/^\.[\._]?/o, readdir $d;
+	my @f = grep !/^\.(?:\.?$|_)/o, readdir $d;
 	closedir $d;
 	my $catalog = getcatalog($src)
 	    or die "$src:Error $MacOSX::File::OSErr";

@@ -3,8 +3,8 @@ package MacOSX::File;
 require 5.6.0;
 use strict;
 
-our $RCSID = q$Id: File.pm,v 0.41 2002/01/14 00:32:29 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.41 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: File.pm,v 0.42 2002/01/16 07:43:07 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.42 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 our $OSErr;
 

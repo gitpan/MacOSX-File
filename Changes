@@ -1,6 +1,12 @@
 #
 # $Id: Changes,v 0.41 2002/01/14 00:32:28 dankogai Exp dankogai $
 #
+0.42  2002.01.16
+      ! bin/pcpmac
+        regex bug that causes all dot-files ignored gets fixed
+	< my @f = grep !/^促.[促._]?/o, readdir $d;
+        > my @f = grep !/^促.(?:促.?$|_)/o, readdir $d;
+        Well, to err is human.
 0.41  2002.01.13
       * documention
       * verious fixes
