@@ -1,6 +1,10 @@
 #
-# $Id: Changes,v 0.51 2002/01/19 15:59:54 dankogai Exp dankogai $
+# $Id: Changes,v 0.52 2002/01/20 06:23:08 dankogai Exp dankogai $
 #
+0.52  2002.01.20
+      ! bin/psync
+        Code optimization
+	More intuitive option settings
 0.51  2002.01.20
       ! bin/psync
         Greatly enhanced.  See the manual for details
@@ -28,8 +32,8 @@
 0.42  2002.01.16
       ! bin/pcpmac
         regex bug that causes all dot-files ignored gets fixed
-	< my @f = grep !/^促.[促._]?/o, readdir $d;
-        > my @f = grep !/^促.(?:促.?$|_)/o, readdir $d;
+	< my @f = grep !/^\.[\._]?/o, readdir $d;
+        > my @f = grep !/^\.(?:\.?$|_)/o, readdir $d;
         Well, to err is human.
 0.41  2002.01.13
       * documention

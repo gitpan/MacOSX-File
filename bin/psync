@@ -1,15 +1,18 @@
 #!/usr/local/bin/perl
 #
-# $Id: psync,v 0.51 2002/01/19 15:59:56 dankogai Exp dankogai $
+# $Id: psync,v 0.52 2002/01/20 06:23:10 dankogai Exp dankogai $
 #
 
 use strict;
 use Getopt::Long;
 use Fcntl;
 use DB_File;
+use File::Basename;
+use MacOSX::File;
 use MacOSX::File::Copy;
 use MacOSX::File::Info;
 use Fcntl qq(:mode);
+
 my $Debug = 0;
 my $Psync_DB = '.psync.db';
 
@@ -29,11 +32,21 @@ GetOptions(
            "n"   => \$opt_n,
 	   "r"   => \$opt_r,
 	   "q"   => \$opt_q,
-           "v:i" => \$opt_v,
+           "v:n" => \$opt_v,
            );
 
+defined $opt_d and $opt_d ||= 1;
 $opt_v ||= 1;
 $opt_q and $opt_v = 0;
+
+$Debug and print <<"EOT";
+\$opt_d = $opt_d,
+\$opt_f = $opt_f,
+\$opt_n = $opt_n,
+\$opt_r = $opt_r,
+\$opt_q = $opt_q,
+\$opt_v = $opt_v,
+EOT
 
 my $IgnorePat =
     qr[
@@ -119,6 +132,10 @@ if ($opt_d){
 	unless ($opt_n){
 	    -e $dpath or next;
 	    unlink $dpath or rmdir $dpath or warn "$dpath : $!";
+	    my $atticf = dirname($dpath) . '/._' . basename($dpath);
+	    if (-f $atticf){
+		unlink $atticf or warn "$atticf : $!";
+	    }
 	}
     }
 }
@@ -142,7 +159,8 @@ for my $k (sort keys %Action){
 	}elsif (S_ISREG($mode)){ # -f
 	    $opt_v and do_log("+f $spath");
 	    copy ($spath, $dpath)
-		or warn "$spath -> $dpath : $MacOSX::File::CopyErr";
+		#or warn "$spath -> $dpath : $MacOSX::File::CopyErr";
+		or warn "$spath -> $dpath : ", $MacOSX::File::strerr;
 	    copyattrib($spath, $dpath, $mode, $uid, $gid, $atime, $mtime);
 	}elsif (S_ISLNK($mode)){ # -l
 	    $opt_v and do_log("+l $spath");
@@ -151,7 +169,8 @@ for my $k (sort keys %Action){
 	}
     }
 }
-$opt_v and do_log("fixing directory permissions ...");
+
+$opt_v and do_log("fixing directory attributes ...");
 # sort must be this order for depth-first traversal
 for my $k (sort {$b cmp $a} keys %Action){
     $Action{$k} >  0 or next;
@@ -167,16 +186,18 @@ for my $k (sort {$b cmp $a} keys %Action){
 			  (getpwuid($uid))[0],(getgrgid($gid))[0] );
     }
 }
-if ($opt_r == 2){
+
+if ($opt_r >= 2){
     unlink "$Dst/$Psync_DB";
     tie (my %db, 'DB_File', "$Dst/$Psync_DB",
-	 O_CREAT|O_RDWR|O_EXLOCK|O_NONBLOCK, 0640, $DB_HASH)
+	 O_CREAT|O_RDWR, 0640, $DB_HASH)
 	or die "$Dst/$Psync_DB : $!";
-    opt_v and do_log("Using $Dst/$Psync_DB to store extra attributes.");
+    $opt_v and do_log("Using $Dst/$Psync_DB to store extra attributes.");
     my $count;
     while ( my ($k, $v) = each %Action){
 	$v >= 0 and $db{$k} = $Attribs{$k};
-	$count++ % 1000 == 0 and warn $count;
+	$count % 1000 == 0 and do_log("Stored $count items");
+	$count++;
     }
     untie %db;
 }
@@ -188,8 +209,8 @@ sub copyattrib{
     unless ($opt_r > 1){
 	chmod $mode & 07777, $dpath;
 	chown $uid,   $gid,  $dpath;
-	utime $atime, $mtime,  $dpath;
     }
+    utime $atime, $mtime,  $dpath;
 }
 
 exit;
@@ -203,7 +224,7 @@ sub sig2txt{
 
 sub addsig{
     my ($path, $mode,$uid,$gid,$size,$atime,$mtime, $action) = @_;
-    my $sig         = pack("N2", $size, $mtime);
+    my $sig  = pack("N2", (S_ISDIR($mode) ? 0 : $size), $mtime);
     tied %Attribs or $Attribs{$path} = pack("N4", $mode, $uid, $gid, $atime);
     if ($opt_v > 3 and $action > 0){
 	do_log qq(was: ) . sig2txt($Signature{$path});

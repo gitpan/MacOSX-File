@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $Id: pcpmac,v 0.51 2002/01/19 15:59:56 dankogai Exp dankogai $
+# $Id: pcpmac,v 0.51 2002/01/19 15:59:56 dankogai Exp $
 #
 
 use strict;

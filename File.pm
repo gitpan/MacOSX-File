@@ -3,10 +3,11 @@ package MacOSX::File;
 use 5.6.0;
 use strict;
 
-our $RCSID = q$Id: File.pm,v 0.51 2002/01/19 15:59:55 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.51 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: File.pm,v 0.52 2002/01/20 06:23:09 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.52 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 our $OSErr;
+our $CopyErr;
 
 sub strerr{
     require MacOSX::File::Constants;
