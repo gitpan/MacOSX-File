@@ -9,6 +9,7 @@ not_here(char *s)
     return -1;
 }
 
+#undef I_POLL
 #include <Finder.h>
 #include "common/util.c"
 

@@ -1,7 +1,12 @@
 #
-# $Id: Changes,v 0.66 2003/04/09 08:25:26 dankogai Exp $
+# $Id: Changes,v 0.67 2004/05/03 14:53:29 dankogai Exp dankogai $
 #
-$Revision: 0.66 $ $Date: 2003/04/09 08:25:26 $
+
+$Revision: 0.67 $ $Date: 2004/05/03 14:53:29 $
+! Copy/filecopy.c Spec/Spec.xs common/util.c
+  Panther compatibility patch by emoy applied.
+
+0.66 $ 2003/04/09 08:25:26
 ! Copy/filecopy.c
   Now supports file names that contains \x{10000} and higher.
   HFS+ stores characters in UTF-16 but until now MacOSX::File only
@@ -10,6 +15,7 @@ $Revision: 0.66 $ $Date: 2003/04/09 08:25:26 $
   Addressed the problem that the ownership of the locked files are not
   copied correctly.  Reported by Joel Sumner <joel.sumner@ni.com>
   Message-Id: <5.1.1.6.0.20030408162041.04bce6d8@postoffice.natinst.com>
+
 0.65 2003/01/19 17:53:21
     ! common/util.c
       s/strcpy/strncpy/  I though I fixed it :)

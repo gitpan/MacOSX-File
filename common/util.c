@@ -1,11 +1,12 @@
 /*
- * $Id: util.c,v 0.65 2003/01/19 17:53:21 dankogai Exp $
+ * $Id: util.c,v 0.67 2004/05/03 14:53:30 dankogai Exp dankogai $
  */
 
 #ifndef _INC_UTIL_C_
 # define _INC_UTIL_C_
 
 #include <sys/param.h>
+#undef I_POLL
 #include <Files.h>
 
 #ifdef _INC_PERL_XSUB_H

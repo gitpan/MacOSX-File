@@ -30,3 +30,4 @@ t/copy.t
 t/file.t
 t/info.t
 t/spec.t
+META.yml                                 Module meta-data (added by MakeMaker)

@@ -1,7 +1,8 @@
 /*
- * $Id: filecopy.c,v 0.65 2003/04/09 08:25:26 dankogai Exp $
+ * $Id: filecopy.c,v 0.67 2004/05/03 14:53:30 dankogai Exp dankogai $
  */
 
+#undef I_POLL
 #include <Files.h>
 #include "common/util.c"
 
