@@ -14,8 +14,8 @@ not_here(char *s)
 
 
 static int
-xs_copy(char *src, char *dst, int maxbufsize, int nocopycat){
-    OSErr err = filecopy(src, dst, maxbufsize, nocopycat);
+xs_copy(char *src, char *dst, int maxbufsize, int preserve){
+    OSErr err = filecopy(src, dst, maxbufsize, preserve);
     return seterr(err);
 }
 
@@ -26,12 +26,12 @@ MODULE = MacOSX::File::Copy		PACKAGE = MacOSX::File::Copy
 PROTOTYPES: ENABLE
 
 int
-xs_copy(src, dst, maxbufsize, nocopycat)
+xs_copy(src, dst, maxbufsize, preserve)
     char *src;
     char *dst;
     int maxbufsize;
-    int nocopycat;
+    int preserve;
     CODE:
-        RETVAL = xs_copy(src, dst, maxbufsize, nocopycat);
+        RETVAL = xs_copy(src, dst, maxbufsize, preserve);
     OUTPUT:
 	RETVAL

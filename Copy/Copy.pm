@@ -19,13 +19,13 @@ of CpMac and MvMac which comes with MacOS X developer kit.
 
 =cut
 
-require 5.005_62;
+use 5.6.0;
 use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Copy.pm,v 0.41 2002/01/14 00:32:28 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.41 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Copy.pm,v 0.50 2002/01/18 18:30:50 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG;
 
 =head2 EXPORT
@@ -56,7 +56,9 @@ our $MAXBUFFERSIZE     = $DEFAULTBUFFERSIZE * 64;
 use Errno;
 use File::Basename;
 
-=item copy($from, $to, [$maxbufsize, $nocopycat])
+=over 4
+
+=item copy($from, $to, [$maxbufsize, $preserve])
 
 copies file from path $from to path $to, just like
 File::Copy::copy().  Returns 1 on success and 0 otherwise.  On error
@@ -67,22 +69,21 @@ value sets the limit of copy buffer.  If less value is required copy()
 automagically allocates smaller amount of memory.  When in doubt just
 leave it as default.
 
-The last argument, $nocopycat tells copy() whether it should copy file
-attributes from the source file.  File::Copy::copy does that by
-default but since HFS's Catalog Information is bigger than stat
-structure,  you can save a little bit more time by setting this to 1.
-When set the behaviour will be more like /bin/cp with no -p option.
+The last argument, $preserve tells copy() whether it should preserve
+file attributes from the source file like like C</bin/cp -p>.  Default
+is 0.
 
 =cut
 
 sub copy($$;$$){
-    my ($src, $dst, $mbs, $nocopycat) = @_;
+    my ($src, $dst, $mbs, $preserve) = @_;
     $mbs ||= $DEFAULTBUFFERSIZE;
-    $nocopycat ||= 0;
     $mbs < $MINBUFFERSIZE and $mbs = $MINBUFFERSIZE;
     $mbs > $MAXBUFFERSIZE and $mbs = $MAXBUFFERSIZE;
+    $preserve ||= 0;
 
-    my ($srcdev, $srcino) = (lstat($src))[0,1];
+    my ($srcdev, $srcino, $srcmode, $srcuid, $srcgid, $srcatime, $srcmtime)
+	= (lstat($src))[0,1,2,4,5,8,9];
     unless(-f _){
 	$MacOSX::File::OSErr = -43; # fnfErr;
 	$! = &Errno::ENOENT;
@@ -95,9 +96,15 @@ sub copy($$;$$){
 	    and carp "$src and $dst are identical";
 	unlink $dst or return;
     }
-    if (my $err = xs_copy($src, $dst, $mbs, $nocopycat)){
+    if (my $err = xs_copy($src, $dst, $mbs, $preserve)){
 	return;
     }else{
+	if ($preserve){
+	    # These are included in FSCatalogInfo
+	    # chown $srcuid, $srcgid, $src;
+	    # chmod ($srcmode & 07777), $src;
+	    # utime $srcatime, $srcmtime, $src;
+	}
 	return 1;
     }
 }
@@ -124,6 +131,8 @@ Within same volume it uses rename().  If not it simply copy() then
 unlink().  
 
 This subroutine uses no xs.
+
+=back
 
 =cut
 
@@ -190,8 +199,10 @@ not Darwin.  Here is how.
 =head1 SEE ALSO
 
 L<File::Copy>
-L<CpMac(1)>
-L<MvMac(1)>
+
+F</Developer/Tool/CpMac>
+
+F</Developer/Tool/MvMac>
 
 =head1 COPYRIGHT
 

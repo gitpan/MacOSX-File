@@ -20,13 +20,13 @@ does within perl.
 
 =cut
 
-require 5.005_62;
+use 5.6.0;
 use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Info.pm,v 0.41 2002/01/14 00:32:29 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.41 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Info.pm,v 0.50 2002/01/18 18:30:50 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG;
 
 require Exporter;
@@ -72,6 +72,8 @@ sub DESTROY{
 
 =head1 METHODS
 
+=over 4
+
 =item $finfo = MacOSX::File::Info->get($path);
 
 =item $finfo = getfileinfo($path);
@@ -115,12 +117,14 @@ these functions.
 
 sub setfinfo{
     my ($info, $path) = @_;
+    ref $info eq __PACKAGE__ or return;
     $path ||= ""; # to keep warnings quiet;
     return !xs_setfinfo(@$info, $path);
 }
 
 sub set{
     my ($self, $path) = @_;
+    ref $self eq __PACKAGE__ or return;
     $path ||= ""; # to keep warnings quiet;
     return !xs_setfinfo(@$self, $path);
 }
@@ -248,6 +252,8 @@ other can be applied to files only.
 On scalar context, it returns attrib. letters.  On list context, it
 returns hash notation shown above;
 
+=back
+
 =cut
 
 use MacOSX::File::Constants;
@@ -367,7 +373,9 @@ Dan Kogai <dankogai@dan.co.jp>
 
 =head1 SEE ALSO
 
-L<MacPerl>
+  L<MacPerl>
+  F</Developer/Tools/GetFileInfo>
+  F</Developer/Tools/SetFile>
 
 =head1 COPYRIGHT
 

@@ -1,5 +1,5 @@
 /*
- * $Id: filecopy.c,v 0.41 2002/01/14 00:32:29 dankogai Exp dankogai $
+ * $Id: filecopy.c,v 0.50 2002/01/18 18:30:50 dankogai Exp dankogai $
  */
 
 #include <Files.h>
@@ -136,7 +136,7 @@ copyfork(HFSUniStr255 *forkName, FSRef *src, FSRef *dst){
 #define min(x, y) ((x) < y) ? (x) : (y)
 
 static OSErr
-filecopy(char *src, char *dst, UInt64 maxbufsize, int nocopycat){
+filecopy(char *src, char *dst, UInt64 maxbufsize, int preserve){
     OSErr err;
     FSCatalogInfo srcCat, dstCat;
     FSRef srcFS, dstFS;
@@ -169,7 +169,7 @@ filecopy(char *src, char *dst, UInt64 maxbufsize, int nocopycat){
 	{ return err; }
     }
     freebuf();
-    if (!nocopycat){
+    if (preserve){
 	err =  FSSetCatalogInfo(&dstFS, kFSCatInfoSettableInfo, &srcCat);
     }
     return err;
@@ -185,10 +185,10 @@ filemove(char *src, char *dst){
 
 int main(int argc, char **argv){
     OSErr         err;
-    int nocopycat = (argc > 3) ? 1 : 0;
+    int preserve = (argc > 3) ? 1 : 0;
     if (argc > 2){
-	err = filecopy(argv[1], argv[2], 0, nocopycat);
-	fpf(stderr, "Err = %d, nocopycat = %d\n", err, nocopycat);
+	err = filecopy(argv[1], argv[2], 0, preserve);
+	fpf(stderr, "Err = %d, preserve = %d\n", err, preserve);
     }
 }
 

@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $Id: pcpmac,v 0.41 2002/01/14 00:32:30 dankogai Exp dankogai $
+# $Id: pcpmac,v 0.50 2002/01/18 18:30:51 dankogai Exp dankogai $
 #
 
 use strict;
@@ -111,7 +111,7 @@ sub prompt{
 }
 
 sub help{
-    warn caller;
+    # warn caller;
     print STDERR <<"EOT";
 usage: $IAM [-r] [-f|-i] [-p][-v] src target
        $IAM [-r] [-f|-i] [-p][-v] src1 ... srcN directory
@@ -185,7 +185,7 @@ dir1 are identical.  It is a kind of fun what cp does!
 
 =item -v
 
-Verbose mode.  Prints each items move to standard output.
+Verbose mode.  Prints each copied item to standard output.
 
 =head1 AUTHOR
 
@@ -194,7 +194,8 @@ Dan Kogai <dankogai@dan.co.jp>
 =head1 SEE ALSO
 
 L<cp(1)>
-L</Developer/Tools/CpMac>
+
+F</Developer/Tools/CpMac>
 
 =head1 COPYRIGHT
 

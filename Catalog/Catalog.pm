@@ -22,13 +22,13 @@ module as stat() for HFS.
 
 =cut
 
-require 5.005_62;
+use 5.6.0;
 use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Catalog.pm,v 0.41 2002/01/14 00:32:28 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.41 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Catalog.pm,v 0.50 2002/01/18 18:30:49 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Exporter;
 require DynaLoader;
@@ -48,8 +48,6 @@ our @ISA = qw(Exporter DynaLoader);
 
 Subs: getcatalog(), setcatalog()
 
-DateTimeUtils.h
-
 =cut
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
@@ -68,6 +66,8 @@ bootstrap MacOSX::File::Catalog $VERSION;
 # Preloaded methods go here.
 
 =head1 METHODS
+
+=over 4
 
 =item $catalog = MacOSX::File::Catalog->get($path);
 
@@ -114,11 +114,13 @@ these functions.
 
 sub setcatalog{
     my ($catalog, $path) = @_;
+    ref $catalog eq __PACKAGE__ or return;
     return !xs_setcatalog($catalog, $path);
 }
 
 sub set{
     my ($self, $path) = @_;
+    ref $self eq __PACKAGE__ or return;
     return !xs_setcatalog($self, $path);
 }
 
@@ -128,6 +130,8 @@ returns a pretty-printed string that contains the value of every
 (gettable) member of FSCatalogInfo structure.
 
     ex) print $catalog->dump;
+
+=back
 
 =cut
 
@@ -278,7 +282,7 @@ __END__
 
 The following methods returns the value of each field;
 
-    $catalog->ref              Used Internally to store FSSpec
+    $catalog->ref              Used Internally to store FSRef
     $catalog->nodeFlags        see lock() method
     $catalog->volume           vRefnum there of. Corresponds to st_dev
     $catalog->parentDirID      dirID thereof 
@@ -293,7 +297,9 @@ The following methods returns the value of each field;
 
 The following methods returns the value of each field without
 argument.  With argument, it sets the value within.
-    
+
+=over 4
+
 =item $catalog->createDate
 
 Content Creation Date.  equiv. to stat($path)->ctime
@@ -325,6 +331,8 @@ stores as UTCDateTime, which is a 64bit fixed floating point. 48bits
 are for integral part and 16bits are for fractional part.  The
 conversion is done automagically but it won't hurt you to know.
 
+=back
+
 =head2 Access methods with list argument
 
 The following methods returns the value of each field as list context without
@@ -335,12 +343,14 @@ fields untouched.
 eg) $catalog->finderInfo('TEXT', 'ttxt')
     # changes type and creator with flags and others unchanged
 
+=over 4
+
 =item ($uid, $gid, $mode, $specialDevice) = $catalog->permissions(...)
 
 returns 4-element list whose values are UID, GID, MODE there of. 
 
 SEE
-L<http://developer.apple.com/technotes/tn/tn1150.html#HFSPlusPermissions>
+http://developer.apple.com/technotes/tn/tn1150.html#HFSPlusPermissions
 for the use of this field. 
 
 =item ($type, $creator, $flags, $location, $fdfldr) = $catalog->finderInfo(...)
@@ -357,6 +367,8 @@ putaway values.  I confess I know nothing about this field;  I just
 faithfully coded accordingly to Carbon document.  Leave it as it is
 unless you know what you are doing.
 
+=back
+
 =head1 AUTHOR
 
 Dan Kogai <dankogai@dan.co.jp>
@@ -365,7 +377,7 @@ Dan Kogai <dankogai@dan.co.jp>
 
 L<MacPerl>
 
-Inside Carbon: File Manager L<http://developer.apple.com/techpubs/macosx/Carbon/Files/FileManager/File_Manager/index.html>
+Inside Carbon: File Manager F<http://developer.apple.com/techpubs/macosx/Carbon/Files/FileManager/File_Manager/index.html>
 
 =head1 COPYRIGHT
 

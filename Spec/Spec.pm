@@ -1,12 +1,12 @@
 package MacOSX::File::Spec;
 
-require 5.005_62;
+use 5.6.0;
 use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Spec.pm,v 0.41 2002/01/14 00:32:30 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.41 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Spec.pm,v 0.50 2002/01/18 18:30:51 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG;
 
 require Exporter;
@@ -66,6 +66,8 @@ locate files on MacOS.  Though MacOS X allows you to access any files
 via path like any decent UNIX, you may still have to access files via
 old-fasioned MacOS way so here is the module.
 
+=over 4
+
 =item $spec = MacOSX::File::Spec->new($path);
 =item $spec = path2spec($path)
 
@@ -101,6 +103,8 @@ necessarily equal to $path when you constructed this object.  Could be
 handy when you want an absolute path of a file which path you know
 only relatively.
 
+=back
+
 =head2 EXPORT
 
 path2spec(), which is an alias of MacOSX::File::Spec->new();
@@ -111,10 +115,11 @@ Dan Kogai <dankogai@dan.co.jp>
 
 =head1 SEE ALSO
 
-L<MacOSX::File>, L<File::Spec>
+L<MacOSX::File>
 
-Carbon File Manager Documentation
-L<http://developer.apple.com/techpubs/macosx/Carbon/Files/FileManager/filemanager.html>
+ L<File::Spec>
+
+Inside Carbon: File Manager F<http://developer.apple.com/techpubs/macosx/Carbon/Files/FileManager/filemanager.html>
 
 =head1 COPYRIGHT
 

@@ -21,6 +21,7 @@ bin/pcpmac
 bin/pgetfinfo
 bin/pmvmac
 bin/psetfinfo
+bin/psync
 common/macdate.c
 common/util.c
 t/benchmark.pl

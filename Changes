@@ -1,6 +1,25 @@
 #
-# $Id: Changes,v 0.41 2002/01/14 00:32:28 dankogai Exp dankogai $
+# $Id: Changes,v 0.50 2002/01/18 18:30:49 dankogai Exp dankogai $
 #
+0.50  2002.01.19
+      ! Makefile.PL
+        INSTALLSCRIPT  => /usr/local/bin
+        INSTALLMAN1DIR => /usr/local/share/man/man1
+        INSTALLMAN3DIR => /usr/local/share/man/man3
+
+      This iso prevent clobbering important files on /usr/{bin,/share/man} .
+      Though this is against platform-independent Makefile.PL, this module 
+      is very platform-dependent to begin with.
+
+      + bin/psync
+        Does update copy.  The very reason I wanted a module like this!
+      ! Catalog/Catalog.pm
+      ! Info/Info.pm
+        set* subs now checks validity of information so it won't call
+	xs_* when invalid.
+      ! Copy/Copy.pm
+        $nocopycat -> $preserve
+	Note now the default is reversed!
 0.42  2002.01.16
       ! bin/pcpmac
         regex bug that causes all dot-files ignored gets fixed

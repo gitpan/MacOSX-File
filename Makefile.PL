@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 0.41 2002/01/14 00:32:29 dankogai Exp dankogai $
+# $Id: Makefile.PL,v 0.50 2002/01/18 18:30:50 dankogai Exp dankogai $
 #
 
 $^O =~ /darwin/o or die "$^O is not darwin!";
@@ -11,10 +11,13 @@ use ExtUtils::MakeMaker;
 
 # makemorefiles();
 
-@EXE = qw(pgetfinfo 	 
-	  psetfinfo
+@EXE = qw(
 	  pcpmac
-	  pmvmac);
+	  pmvmac
+	  psetfinfo
+	  pgetfinfo 
+	  psync
+);
 
 WriteMakefile
     (
@@ -25,6 +28,9 @@ WriteMakefile
      ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'File.pm', # retrieve abstract from module
        AUTHOR     => 'Dan Kogai <dankogai@dan.co.jp>') : ()),
+     INSTALLSCRIPT      => "/usr/local/bin",
+     INSTALLMAN1DIR     => "/usr/local/share/man/man1",
+     INSTALLMAN3DIR     => "/usr/local/share/man/man3",
 );
 
 sub makemorefiles{

@@ -1,10 +1,10 @@
 package MacOSX::File;
 
-require 5.6.0;
+use 5.6.0;
 use strict;
 
-our $RCSID = q$Id: File.pm,v 0.42 2002/01/16 07:43:07 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.42 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: File.pm,v 0.50 2002/01/18 18:30:50 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 our $OSErr;
 
@@ -30,9 +30,10 @@ without calling these binaries.
 
 =head1 SUBMODULES
 
-       MacOSX::File::Copy
-       MacOSX::File::Info
-       MacOSX::File::Spec
+  MacOSX::File::Catalog    - Gets/Sets FSCatalogInfo Attributes
+  MacOSX::File::Copy       - copy/move with HFS(+) attributes
+  MacOSX::File::Info       - Gets/Sets File Attributes (Subset of ::Catalog)
+  MacOSX::File::Spec       - Gets FSSpec Structure
 
 =head1 INSTALLATION
 
@@ -50,17 +51,10 @@ install".  To get binary distribution, check MacOSX-File-bindist
 via CPAN.
 
 =head1 COPYRIGHT AND LICENCE
-       
+
 Copyright 2002 Dan Kogai <dankogai@dan.co.jp>
 
 This library is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
-
-MacOSX::File::Copy uses MoreFiles of Apple Sample Code.
-Copyright 1992-2001 Apple Computer, Inc.  Portions
-copyright 1995 Jim Luther All rights reserved.
-See the URI below on details
-
-http://developer.apple.com/samplecode/Sample_Code/Files/MoreFiles.htm
 
 =cut
