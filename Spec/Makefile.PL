@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 0.67 2004/05/03 14:53:30 dankogai Exp dankogai $
+# $Id: Makefile.PL,v 0.68 2004/05/25 16:03:23 dankogai Exp dankogai $
 #
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
@@ -14,4 +14,5 @@ WriteMakefile
      LIBS	=> "",
      LDDLFLAGS  => qq(-bundle -flat_namespace -undefined suppress -framework Carbon),
      INC	=> qq(-I../ -I/Developer/Headers/FlatCarbon),
+     ($] <= 5.008001 ? (CC => 'gcc2') : ()),
     );

@@ -4,8 +4,8 @@ use 5.6.0;
 use strict;
 use Carp;
 
-our $RCSID = q$Id: File.pm,v 0.67 2004/05/03 14:53:30 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.67 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: File.pm,v 0.68 2004/05/25 16:01:50 dankogai Exp $;
+our $VERSION = do { my @r = (q$Revision: 0.68 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Exporter;
 require DynaLoader;

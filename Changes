@@ -1,12 +1,17 @@
 #
-# $Id: Changes,v 0.67 2004/05/03 14:53:29 dankogai Exp dankogai $
+# $Id: Changes,v 0.68 2004/05/25 16:03:23 dankogai Exp dankogai $
 #
+$Revision: 0.68 $ $Date: 2004/05/25 16:03:23 $
+! Catalog/Makefile.PL Info/Makefile.PL Copy/Makefile.PL Spec/Makefile.PL
+  Now uses gcc2 when perl version is 5.8.1 or before  so it compiles
+  without 'make CC=gcc2' on Apple-bundled /usr/bin/perl
+  https://rt.cpan.org/Ticket/Display.html?id=6409
 
-$Revision: 0.67 $ $Date: 2004/05/03 14:53:29 $
+0.67 2004/05/03 14:53:29
 ! Copy/filecopy.c Spec/Spec.xs common/util.c
   Panther compatibility patch by emoy applied.
 
-0.66 $ 2003/04/09 08:25:26
+0.66 2003/04/09 08:25:26
 ! Copy/filecopy.c
   Now supports file names that contains \x{10000} and higher.
   HFS+ stores characters in UTF-16 but until now MacOSX::File only

@@ -1,5 +1,5 @@
 /*
- * $Id: filecopy.c,v 0.67 2004/05/03 14:53:30 dankogai Exp dankogai $
+ * $Id: filecopy.c,v 0.67 2004/05/03 14:53:30 dankogai Exp $
  */
 
 #undef I_POLL
