@@ -21,7 +21,6 @@ new(char *class, char *path){
     FSSpec  spec;
     FSSpec  *sp = &spec;
     SV      *self;
-    HV      *pkg = gv_stashpv(ClassName, 1);
 
     if (strcmp(class, ClassName) != 0){ return NULL; };
     if (err = FSPathMakeRef(path, &ref, NULL)){ 
@@ -33,7 +32,7 @@ new(char *class, char *path){
 	seterr(err); return NULL;
     }
     self = newRV_noinc(newSVpv((char *)sp, sizeof(spec)));
-    return sv_bless(self, pkg);
+    return sv_bless(self, gv_stashpv(ClassName, 1));
 
 }
 
@@ -83,6 +82,8 @@ path(SV *self){
 
 
 MODULE = MacOSX::File::Spec		PACKAGE = MacOSX::File::Spec	
+
+PROTOTYPES: ENABLE
 
 SV *
 new(class, path)

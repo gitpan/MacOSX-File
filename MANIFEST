@@ -1,8 +1,12 @@
 Changes
+Catalog/Catalog.pm
+Catalog/Catalog.xs
+Catalog/Makefile.PL
 Copy/Copy.pm
 Copy/Copy.xs
 Copy/Makefile.PL
 File.pm
+File/Constants.pm
 Info/Info.pm
 Info/Info.xs
 Info/Makefile.PL
@@ -14,9 +18,14 @@ Spec/Spec.pm
 Spec/Spec.xs
 common/macdate.c
 common/util.c
+bin/pgetfinfo
+bin/psetfinfo
+t/file.t
+t/catalog.t
 t/copy.t
 t/info.t
 t/spec.t
+t/benchmark.pl
 MoreFiles/DirectoryCopy.c
 MoreFiles/DirectoryCopy.h
 MoreFiles/FileCopy.c

@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 0.30 2002/01/12 20:30:26 dankogai Exp dankogai $
+# $Id: Makefile.PL,v 0.30 2002/01/12 20:30:25 dankogai Exp dankogai $
 #
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
@@ -7,8 +7,8 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile
     (
-     NAME              => 'MacOSX::File::Info',
-     VERSION_FROM      => 'Info.pm',
+     NAME              => 'MacOSX::File::Catalog',
+     VERSION_FROM      => 'Catalog.pm',
      PREREQ_PM         => {}, # e.g., Module::Name => 1.1
      LIBS	=> qq(-L../MoreFiles -lMoreFiles),
      LDDLFLAGS  => qq(-bundle -flat_namespace -undefined suppress -framework Carbon),

@@ -5,8 +5,9 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Copy.pm,v 0.10 2002/01/06 13:57:12 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.10 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Copy.pm,v 0.30 2002/01/12 20:30:25 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $DEBUG;
 
 require Exporter;
 require DynaLoader;
@@ -46,8 +47,14 @@ sub copy{
 	$_[2] < $MINBUFFERSIZE ? $MINBUFFERSIZE :
 	    $_[2] > $MAXBUFFERSIZE ? $MINBUFFERSIZE : $_[2]
 		: $DEFAULTBUFFERSIZE;
-    -f $src or ($! = &Errno::ENOENT and return);
-    -e $dst and (unlink $dst or return);
+    unless(-f $src){
+	$MacOSX::File::OSErr = -43; # fnfErr;
+	$! = &Errno::ENOENT;
+	return;
+    }
+    if (-e $dst){
+	unlink $dst or return;
+    }
     if (my $err = xs_copy($src, $dst, $bufsize)){
 	return;
     }else{
@@ -57,8 +64,7 @@ sub copy{
 
 sub move{
     use File::Basename;
-    my ($src, $dst) = @_;
-    
+    my ($src, $dst) = @_;    
     # 1st we make sure that $src is file
     -f $src or ($! = &Errno::ENOENT and return);
     my $srcdev = (stat(_))[0];
@@ -70,8 +76,10 @@ sub move{
 
     if ($srcdev == $dstdev){ # same volume
 	if (my $err = xs_move($src, $dst)){
+	    $DEBUG and warn $err;
 	    return;
 	}else{
+	    $DEBUG and warn $err;
 	    return 1;
 	}
     }else{ # cross-device; copy then delete
@@ -109,6 +117,16 @@ copy() and move()
 =head1 AUTHOR
 
 Dan Kogai <dankogai@dan.co.jp>
+
+=head1 BUGS
+
+Files w/ Unicode names fail to copy.  This is due to the fact that
+MoreFiles only supports FSSpec-based operations while Unicode names
+really requires purely FSRef-based operations (in other words,
+FSSpec-free).
+
+I am planning to rerite Copy.xs so that it is FSSpec-free.  Give
+me a little bit more time....
 
 =head1 SEE ALSO
 

@@ -1,5 +1,5 @@
 #
-# $Id: info.t,v 0.30 2002/01/12 20:30:27 dankogai Exp dankogai $
+# $Id: catalog.t,v 0.30 2002/01/12 20:30:27 dankogai Exp dankogai $
 #
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
@@ -11,43 +11,37 @@
 use Test;
 use strict;
 my $Debug = $ARGV[0] || 0;
-BEGIN { plan tests => 10 };
+BEGIN { plan tests => 7 };
 
-use MacOSX::File::Info;
+use MacOSX::File::Catalog;
 ok(1); # If we made it this far, we're ok.
 
-my $finfo = MacOSX::File::Info->get($0);
-ok($finfo);
+my $catalog = MacOSX::File::Catalog->get($0);
+$catalog ? ok(1) : ok(0);
 
-use Data::Dumper;
-$Debug and print Dumper $finfo;
+use Devel::Peek;
+$Debug and Dump $catalog;
 
 use File::Copy;
 copy($0, "dummy");
 
-$finfo->type('TEXT');
-$finfo->creator('ttxt');
-my $attr = $finfo->flags("avbstclinmed");
-ok($attr eq "avbstclinmed");
-$attr = $finfo->flags(-locked => 1);
-ok($attr eq "avbstcLinmed");
-ok($finfo->nodeFlags == 1);
-ok(setfinfo($finfo, "dummy"));
+$catalog->finderInfo('TEXT', 'ttxt');
+$catalog->lock;
+
+setcatalog($catalog, "dummy") ? ok(1) : ok(0);
 my $asked = askgetfileinfo("dummy");
-ok($asked eq "avbstcLinmed");
+$asked eq "avbstcLinmed" ? ok(1) : ok(0);
 $Debug and warn $asked ;
-$Debug and print Dumper $finfo;
+$Debug and Dump $catalog;
 unlink "dummy";
-ok($!);
+$! ? ok(1) : ok(0);
 $Debug and warn $!;
 $! = 0;
-$finfo->unlock;
-my $n;
-ok(setfinfo($finfo, "dummy"));
+$catalog->unlock;
+my $n = setcatalog($catalog, "dummy") ? ok(1) : ok(0);
 $Debug and warn $n;
-ok(unlink "dummy");
+unlink "dummy" ? ok(1) : ok(0);
 $Debug and warn $!;
-
 $Debug or unlink "dummy";
 
 sub askgetfileinfo{

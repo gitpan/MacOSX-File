@@ -5,8 +5,9 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Spec.pm,v 0.10 2002/01/06 13:57:13 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.10 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Spec.pm,v 0.30 2002/01/12 20:30:26 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $DEBUG;
 
 require Exporter;
 require DynaLoader;

@@ -1,6 +1,24 @@
 #
-# $Id: Changes,v 0.10 2002/01/06 13:57:12 dankogai Exp dankogai $
+# $Id: Changes,v 0.30 2002/01/12 20:30:25 dankogai Exp dankogai $
 #
-
+0.30  2002.01.13
+      + bin/pgetfinfo
+      + bin/pgetfinfo
+      + t/benchmark.pl
+      ! common/util.c
+        minor bug at dirname() fixed;
+      ! FSp(Set|Rst)Lock done when and only when the target is file
+        (When done to directory, Carbon slaps you with segfault!)
+      * and lots of bug fixes and cleanups here and there
+0.21  2002.01.10
+      ! Info/Info.xs, Catalog/Catalog.xs 
+        possible memory leak fixed
+0.20  2002.01.10
+      + MacOSX::File::Catalog added
+      ! Info/Info.xs -- FSpRstLock() before FSSetCatalogInfo()
+0.11  2002.01.08
+      + File/Constants.pm
+      ! Info/Info.pm -- constants moved to Constants.pm
+      ! Info/Info.xs -- possible memory leak fixed.
 0.10  2002.01.06
       First Release

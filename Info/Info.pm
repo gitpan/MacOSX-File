@@ -2,7 +2,7 @@ package MacOSX::File::Info;
 
 =head1 NAME
 
-MacOSX::File - Get (HFS) File Attributes
+MacOSX::File::Info - Gets/Sets (HFS) File Attributes
 
 =head1 SYNOPSIS
 
@@ -25,8 +25,9 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Info.pm,v 0.10 2002/01/06 13:57:12 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.10 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Info.pm,v 0.30 2002/01/12 20:30:26 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $DEBUG;
 
 require Exporter;
 require DynaLoader;
@@ -46,17 +47,6 @@ our @ISA = qw(Exporter DynaLoader);
 
 Subs: getfinfo(), setfinfo()
 
-fdFlags Constants: 
-kIsAlias, kIsInvisible, kHasBundle, kNameLocked, kIsStationery,
-kHasCustomIcon, kHasBeenInited, kHasNoINITs, kIsShared, 
-kIsHiddenExtention, kIsOnDesk,
-
-nodeFlags Constants:
-kFSNodeLockedMask, kFSNodeResOpenMask, kFSNodeDataOpenMask,
-kFSNodeIsDirectoryMask, kFSNodeCopyProtectMask, kFSNodeForkOpenMask
-
-DateTimeUtils.h
-
 =cut
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
@@ -68,56 +58,17 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 		 getfinfo
 		 setfinfo
-
-		 kIsAlias
-		 kIsInvisible
-		 kHasBundle
-		 kNameLocked
-		 kIsStationery
-		 kHasCustomIcon
-		 kHasBeenInited
-		 kHasNoINITs
-		 kIsShared
-		 kIsHiddenExtention 
-		 kIsOnDesk          
-		 kFSNodeLockedMask
-		 kFSNodeResOpenMask
-		 kFSNodeDataOpenMask
-		 kFSNodeIsDirectoryMask
-		 kFSNodeCopyProtectMask
-		 kFSNodeForkOpenMask
-
 		 );
 
 bootstrap MacOSX::File::Info $VERSION;
 
 # Preloaded methods go here.
 
-# constants for FdFlags from <Finder.h>
-use constant kIsAlias           => 0x8000;
-use constant kIsInvisible       => 0x4000;
-use constant kHasBundle         => 0x2000;
-use constant kNameLocked        => 0x1000;
-use constant kIsStationery      => 0x0800;
-use constant kHasCustomIcon     => 0x0400;
-use constant kHasBeenInited     => 0x0100;
-use constant kHasNoINITs        => 0x0080;
-use constant kIsShared          => 0x0040;
-use constant kIsHiddenExtention => 0x0010;
-use constant kIsOnDesk          => 0x0001;
-
-# kIsHiddenExtention corresponds to 'E' attribute of
-# /Developer/Tools/SetFile command
-# but there is no corresponding constant in <Finder.h> !
-
-# constants for nodeFlags from <Files.h>
-# only kFSNodeLockedMask is relevant, however.
-use constant kFSNodeLockedMask      => 0x0001;
-use constant kFSNodeResOpenMask     => 0x0004;
-use constant kFSNodeDataOpenMask    => 0x0008;
-use constant kFSNodeIsDirectoryMask => 0x0010;
-use constant kFSNodeCopyProtectMask => 0x0040;
-use constant kFSNodeForkOpenMask    => 0x0080;
+sub DESTROY{
+    $DEBUG or return;
+    carp "Destroying ", __PACKAGE__;
+    return;
+}
 
 =head1 METHODS
 
@@ -134,14 +85,14 @@ is set.
 sub getfinfo{
     my ($path) = @_;
     my $self = xs_getfinfo($path);
-    @$self or return;
+    defined $self or return;
     bless $self;
 }
 
 sub get{
     my ($class, $path) = @_;
     my $self = xs_getfinfo($path);
-    @$self or return;
+    defined $self or return;
     bless $self => $class;
 }
 
@@ -164,12 +115,26 @@ these functions.
 
 sub setfinfo{
     my ($info, $path) = @_;
+    $path ||= ""; # to keep warnings quiet;
     return !xs_setfinfo(@$info, $path);
 }
 
 sub set{
     my ($self, $path) = @_;
+    $path ||= ""; # to keep warnings quiet;
     return !xs_setfinfo(@$self, $path);
+}
+
+=item $clone  = $finfo->clone;
+
+Returns a cloned (deep-copied) object.  Handy when you want to compare changes.
+
+=cut
+
+sub clone{
+    my $self = shift;
+    my (@new) = @$self;
+    bless \@new, (ref $self);
 }
 
 =item $finfo->ref(), $finfo->nodeFlags(),
@@ -181,12 +146,12 @@ only.  Use of these methods are unlikely except for debugging purpose.
 
 # Construct accessor methods all at once
 
-our %roField = (
-		ref        => 0,
-		nodeFlags  => 1,
-		);
+my %_ro = (
+	   ref        => 0,
+	   nodeFlags  => 1,
+	   );
 
-while(my($field, $index) = each %roField){
+while(my($field, $index) = each %_ro){
     no strict 'refs';
     *$field = sub { $_[0]->[$index] };
 }
@@ -225,16 +190,16 @@ $finfo->flags method instead.
 
 =cut
 
-our %rwField = (
-		type              => 2,
-		creator           => 3,
-		fdFlags           => 4,
-		ctime             => 5,
-		mtime             => 6,
-		);
+my %_rw = (
+	   type              => 2,
+	   creator           => 3,
+	   fdFlags           => 4,
+	   ctime             => 5,
+	   mtime             => 6,
+	   );
 
 
-while(my($field, $index) = each %rwField){
+while(my($field, $index) = each %_rw){
     no strict 'refs';
     *$field = sub  {
 	my $self = shift;
@@ -285,7 +250,9 @@ returns hash notation shown above;
 
 =cut
 
-our %Key2Letter =
+use MacOSX::File::Constants;
+
+my %Key2Letter =
     qw(
        -alias      a
        -invisible  v
@@ -300,9 +267,9 @@ our %Key2Letter =
        -hiddenx    e
        -desktop    d
        );
-our %Letter2Key = reverse %Key2Letter;
-our @Letters    = qw(a v b s t c l i n m e d);
-our %key2Flags = 
+my %Letter2Key = reverse %Key2Letter;
+my @Letters    = qw(a v b s t c l i n m e d);
+my %key2Flags = 
     (
      -alias      =>  kIsAlias,
      -invisible  =>  kIsInvisible,
@@ -355,14 +322,15 @@ sub flags{
     my $attrib = "";
     unless (@_){
 	wantarray and return %attrib;
-	for my $a (keys %attrib){
-	    $attrib .= $attrib{$a} ? uc(Key2Letter{$a}) : Key2Letter{$a};
+	for my $l (@Letters){
+	    $attrib .=  $attrib{$Letter2Key{$l}} ? uc($l) : $l;
 	}
 	return $attrib;
     }
     if (scalar(@_) == 1){ # Letter notation
-	for my $l (map { chr } unpack("C*", $_[0])){
-	    $attrib{$Letter2Key{$l}} = ($l =~ tr/[A-Z]/[A-Z]/) ? 1 : 0;
+	my $letters = shift;
+	for my $l (map { chr } unpack("C*", $letters)){
+	    $attrib{$Letter2Key{lc($l)}} = ($l =~ tr/[A-Z]/[A-Z]/) ? 1 : 0;
 	}
     }else{
 	my %args = @_;
@@ -370,15 +338,18 @@ sub flags{
 	    exists $attrib{$k} and $attrib{$k} = $args{$k};
 	}
     }
-
+    $fdFlags = 0;
     for my $k (keys %attrib){
-	$k eq '-locked' ? $nodeFlags |= $attrib{$k} : $fdFlags |= $attrib{$k};
+	if ($k eq '-locked'){
+	    $attrib{$k} ? $self->lock : $self->unlock;
+	}else{
+	    $fdFlags |= $attrib{$k} ? $key2Flags{$k} : 0;
+	}
     }
     $self->fdFlags($fdFlags);
-    $self->[1] = $nodeFlags;
 
-    wantarray and return %attrib;
     defined wantarray or return;
+    wantarray and return %attrib;
     for my $l (@Letters){
 	$attrib .=  $attrib{$Letter2Key{$l}} ? uc($l) : $l;
     }
@@ -404,12 +375,5 @@ Copyright 2002 Dan Kogai <dankogai@dan.co.jp>
 
 This library is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
-
-This modules uses MoreFiles of Apple Sample Code unchanged.
-L<http://developer.apple.com/samplecode/Sample_Code/Files/MoreFiles.htm>
-
-Copyright 1992-2001 Apple Computer, Inc.
-Portions copyright 1995 Jim Luther
-All rights reserved.
 
 =cut

@@ -1,5 +1,5 @@
 /*
- * $Id: Info.xs,v 0.10 2002/01/06 13:57:12 dankogai Exp dankogai $
+ * $Id: Info.xs,v 0.30 2002/01/12 20:30:26 dankogai Exp dankogai $
  */
 
 #include "EXTERN.h"
@@ -20,18 +20,21 @@ not_here(char *s)
 /* #define CATALOGINFONEEDED kFSCatInfoGettableInfo */
 #define CATALOGINFONEEDED (kFSCatInfoNodeFlags|kFSCatInfoCreateDate|kFSCatInfoContentMod|kFSCatInfoFinderInfo)
 
-static AV *
+#define NUMMEMBERSINFO 7
+
+static SV *
 xs_getfinfo(char *path){
     FSRef  Ref;
     FSSpec Spec;
     FSCatalogInfo Catalog;
     FInfo  *finfo = (FInfo *)(&Catalog.finderInfo);
 
-    AV*   av = newAV();
+    SV*   sva[NUMMEMBERSINFO];
     OSErr err;
 
     if (err = FSPathMakeRef(path, &Ref, NULL)){
-	return av;
+	seterr(err);
+	return &PL_sv_undef;
     }
     
     /* 
@@ -46,30 +49,27 @@ xs_getfinfo(char *path){
 			       NULL,
 			       NULL))
     {
-	return av;
+	seterr(err);
+	return &PL_sv_undef;
     }
 
-    av_push(av, newSVpv((char *)&Ref, sizeof(Ref)));
-    av_push(av, newSViv(Catalog.nodeFlags));
+    sva[0] =  sv_2mortal(newSVpv((char *)&Ref, sizeof(Ref)));
+    sva[1] =  sv_2mortal(newSViv(Catalog.nodeFlags));
 
     if (kFSNodeIsDirectoryMask & Catalog.nodeFlags){
-	av_push(av, newSVpv("", 0));
-	av_push(av, newSVpv("", 0));
+	sva[2] =  sv_2mortal(newSVpv("", 0));
+	sva[3] =  sv_2mortal(newSVpv("", 0));
     }else{
-	av_push(av, newSVpv(Catalog.finderInfo, 4));
-	av_push(av, newSVpv(Catalog.finderInfo+4, 4));
+	sva[2] =  sv_2mortal(newSVpv(Catalog.finderInfo, 4));
+	sva[3] =  sv_2mortal(newSVpv(Catalog.finderInfo+4, 4));
     }
 
-    av_push(av, newSViv(finfo->fdFlags));
+    sva[4] =  sv_2mortal(newSViv(finfo->fdFlags));
 
-    /*
-    av_push(av, newSViv(UTCDateTime2time_t(&Catalog.createDate)));
-    av_push(av, newSViv(UTCDateTime2time_t(&Catalog.contentModDate)));
-    */
-    av_push(av, newSVnv(UDT2D(&Catalog.createDate)));
-    av_push(av, newSVnv(UDT2D(&Catalog.contentModDate)));
+    sva[5] =  sv_2mortal(newSVnv(UDT2D(&Catalog.createDate)));
+    sva[6] =  sv_2mortal(newSVnv(UDT2D(&Catalog.contentModDate)));
 
-    return av;
+    return newRV_noinc((SV *)av_make(NUMMEMBERSINFO, sva));
  }
 
 static int
@@ -99,7 +99,18 @@ xs_setfinfo(
     }else{
 	rp = (FSRef *)SvPV_nolen(svref);
     }
-    
+
+    /* prefetch destination catalog; may be used for file locks */
+    if (err = FSGetCatalogInfo(&Ref,
+			       kFSCatInfoSettableInfo|kFSCatInfoNodeFlags,
+			       &Catalog,
+			       NULL, NULL, NULL))
+    {
+	return seterr(err);
+    }
+
+    /* now set Catalog */
+
     Catalog.nodeFlags = nodeFlags;
     finfo->fdType    = char2OSType(type);
     finfo->fdCreator = char2OSType(creator);
@@ -111,16 +122,25 @@ xs_setfinfo(
 	return seterr(err);
     }
 
-    FSRef2FSSpec(rp, &Spec);
-
-    err = (nodeFlags & kFSNodeLockedMask) ?
-	FSpSetFLock (&Spec) : FSpRstFLock (&Spec);
+    
+    /* 
+     * now restore the lock state iff it's a file 
+     * FSp(Rst|Set)FLock dies with segfault when applied to
+     * directories! 
+     */
+    if (!(Catalog.nodeFlags & kFSNodeIsDirectoryMask)){
+	FSRef2FSSpec(rp, &Spec);
+	err = Catalog.nodeFlags & kFSNodeLockedMask ? 
+	    FSpSetFLock(&Spec) : FSpRstFLock(&Spec) ;
+    }
     return seterr(err);
 }
 
 MODULE = MacOSX::File::Info		PACKAGE = MacOSX::File::Info	
 
-AV *
+PROTOTYPES: ENABLE
+
+SV *
 xs_getfinfo(path)
     char *path;
     CODE:
