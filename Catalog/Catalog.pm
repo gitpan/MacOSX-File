@@ -27,8 +27,8 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Catalog.pm,v 0.50 2002/01/18 18:30:49 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 0.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Catalog.pm,v 0.60 2002/01/27 16:43:17 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.60 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Exporter;
 require DynaLoader;
@@ -143,45 +143,46 @@ sub dump{
 	    . "." . ($_[0]-int($_[0]));
 	};
     my $octlist = sub { join ",", map {sprintf "0%o" ,$_} @_ };
-    return join("\n",
-		"(FSRef)",
-		sprintf("nodeFlags =>            0x%04x", $s->[1]),
-		sprintf("volume =>               %6d", $s->[2]),
-		sprintf("parentDirID =>      0x%08x", $s->[3]),
-		sprintf("nodeID =>           0x%08x", $s->[4]),
-		sprintf("sharingFlags =>           0x%02x", $s->[5]),
-		sprintf("userPrivileges =>         0x%02x", $s->[6]),
-		sprintf("createDate =>       %s", $t2s->($s->[7])),
-		sprintf("contentModDate =>   %s", $t2s->($s->[8])),
-		sprintf("attributeModDate => %s", $t2s->($s->[9])),
-		sprintf("accessDate =>       %s", $t2s->($s->[10])),
-		sprintf("backupDate =>       %s", $t2s->($s->[11])),
-		sprintf("permissions =>      ["),
-		sprintf("                         %5d, # uid", $s->[12][0]),
-		sprintf("                         %5d, # gid", $s->[12][1]),
-		sprintf("                       0%6o, # mode", $s->[12][2]),
-		sprintf("                        0x%04x, # ??", $s->[12][3]),
-		sprintf("                    ]"),
-		sprintf("finderInfo =>"),
-		sprintf(" fdType =>              '%s'",  $s->[13][0]),
-		sprintf(" fdCreator =>           '%s'",  $s->[13][1]),
-		sprintf(" fdFlags =>             0x%04x", $s->[13][2]),
-		sprintf(" fdLocation =>          [%s]", 
-			join(",", @{$s->[13][3]})),
-		sprintf(" fdFldr =>              0x%04x", $s->[13][4]),
-		sprintf("extFinderInfo =>"),
-		sprintf("  fdIconID =>           0x%04x", $s->[14][0]),
-		sprintf("  fdScript =>           0x%04x", $s->[14][1]),
-		sprintf("  fdXFlags =>             0x%02x", $s->[14][2]),
-		sprintf("  fdComment =>            0x%02x", $s->[14][3]),
-		sprintf("  fdPutAway =>      0x%08x", $s->[14][4]),
-		sprintf("dataLogicalSize =>  %10d", $s->[15]),
-		sprintf("dataPhysicalSize => %10d", $s->[16]),
-		sprintf("rsrcLogicalSize =>  %10d", $s->[17]),
-		sprintf("rsrcPhysicalSize => %10d", $s->[18]),
-		sprintf("valence =>          0x%08x", $s->[19]),
-		sprintf("textEncodingHint => 0x%08x", $s->[20]),
-		"\n");
+    return 
+	join("\n",
+	     "(FSRef)",
+	     sprintf("nodeFlags =>                  0x%04x", $s->[1]),
+	     sprintf("volume =>                     %6d", $s->[2]),
+	     sprintf("parentDirID =>            0x%08x", $s->[3]),
+	     sprintf("nodeID =>                 0x%08x", $s->[4]),
+	     sprintf("sharingFlags =>                 0x%02x", $s->[5]),
+	     sprintf("userPrivileges =>               0x%02x", $s->[6]),
+	     sprintf("createDate =>             %s", $t2s->($s->[7])),
+	     sprintf("contentModDate =>         %s", $t2s->($s->[8])),
+	     sprintf("attributeModDate =>       %s", $t2s->($s->[9])),
+	     sprintf("accessDate =>             %s", $t2s->($s->[10])),
+	     sprintf("backupDate =>             %s", $t2s->($s->[11])),
+	     sprintf("permissions =>            ["),
+	     sprintf("                          %10d, # uid", $s->[12][0]),
+	     sprintf("                          %10d, # gid", $s->[12][1]),
+	     sprintf("                             0%6o, # mode", $s->[12][2]),
+	     sprintf("                          0x%08x, # device", $s->[12][3]),
+	     sprintf("                          ]"),
+	     sprintf("finderInfo =>      "),
+	     sprintf(" fdType =>                    '%s'",  $s->[13][0]),
+	     sprintf(" fdCreator =>                 '%s'",  $s->[13][1]),
+	     sprintf(" fdFlags =>                   0x%04x", $s->[13][2]),
+	     sprintf(" fdLocation =>                [%s]", 
+		     join(",", @{$s->[13][3]})),
+	     sprintf(" fdFldr =>                    0x%04x", $s->[13][4]),
+	     sprintf("extFinderInfo =>      "),
+	     sprintf("  fdIconID =>                 0x%04x", $s->[14][0]),
+	     sprintf("  fdScript =>                 0x%04x", $s->[14][1]),
+	     sprintf("  fdXFlags =>                   0x%02x", $s->[14][2]),
+	     sprintf("  fdComment =>                  0x%02x", $s->[14][3]),
+	     sprintf("  fdPutAway =>            0x%08x", $s->[14][4]),
+	     sprintf("dataLogicalSize =>  %16.0f", $s->[15]),
+	     sprintf("dataPhysicalSize => %16.0f", $s->[16]),
+	     sprintf("rsrcLogicalSize =>  %16.0f", $s->[17]),
+	     sprintf("rsrcPhysicalSize => %16.0f", $s->[18]),
+	     sprintf("valence =>                0x%08x", $s->[19]),
+	     sprintf("textEncodingHint =>       0x%08x", $s->[20]),
+	     "\n");
 }
 
 # Construct accessor methods all at once

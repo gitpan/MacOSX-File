@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $Id: psync,v 0.52 2002/01/20 06:23:10 dankogai Exp dankogai $
+# $Id: psync,v 0.60 2002/01/27 16:43:20 dankogai Exp dankogai $
 #
 
 use strict;
@@ -17,6 +17,7 @@ my $Debug = 0;
 my $Psync_DB = '.psync.db';
 
 my (
+    $opt_a,
     $opt_d,
     $opt_f,
     $opt_n,
@@ -27,6 +28,8 @@ my (
 
 Getopt::Long::Configure("bundling");
 GetOptions(
+	   "D"   => \$Debug,
+	   "a"   => \$opt_a,
            "d:n" => \$opt_d,
 	   "f"   => \$opt_f,
            "n"   => \$opt_n,
@@ -40,6 +43,7 @@ $opt_v ||= 1;
 $opt_q and $opt_v = 0;
 
 $Debug and print <<"EOT";
+\$opt_a = $opt_a,
 \$opt_d = $opt_d,
 \$opt_f = $opt_f,
 \$opt_n = $opt_n,
@@ -56,6 +60,7 @@ my $IgnorePat =
           | private/var/tmp/.*
           | private/var/vm/.* 
           | private/var/run/.* 
+	  | Temporary\ Items/.*
           )
        ]xo;
 
@@ -98,16 +103,19 @@ if ($opt_r){
     }
 }
 
+my $ScanCount = 0;
+
 $opt_v and do_log("Scanning Destination Directory $Dst ...");
 $Topdev = (lstat($Dst))[0];
 scantree($Dst, '', -1);
-$opt_v and do_log((scalar keys %Action) . " items found.");
+$opt_v and do_log("\n$ScanCount items found.");
 
 for my $src (@ARGV){
+    $ScanCount = 0;
     $opt_v and do_log("Scanning Source Item $src ...");
     $Topdev = (lstat($src))[0];
     scantree($src, '' , +1);
-    $opt_v and do_log((scalar keys %Action) . " items found.");
+    $opt_v and do_log("\n$ScanCount items found.");
 }
 
 if ($opt_v){
@@ -158,14 +166,17 @@ for my $k (sort keys %Action){
 	    }
 	}elsif (S_ISREG($mode)){ # -f
 	    $opt_v and do_log("+f $spath");
-	    copy ($spath, $dpath)
-		#or warn "$spath -> $dpath : $MacOSX::File::CopyErr";
-		or warn "$spath -> $dpath : ", $MacOSX::File::strerr;
+	    $opt_a or copy ($spath, $dpath)
+		or $Debug ? 
+		warn "$spath -> $dpath : ", &MacOSX::File::strerr :
+		warn "$spath -> $dpath : $MacOSX::File::CopyErr" ;
 	    copyattrib($spath, $dpath, $mode, $uid, $gid, $atime, $mtime);
 	}elsif (S_ISLNK($mode)){ # -l
 	    $opt_v and do_log("+l $spath");
-	    unlink $dpath;
-	    symlink(readlink($spath), $dpath);
+	    my $slink = readlink($spath);
+	    if ($slink ne readlink($dpath)){
+		unlink $dpath && symlink(readlink($spath), $dpath);
+	    }
 	}
     }
 }
@@ -182,24 +193,29 @@ for my $k (sort {$b cmp $a} keys %Action){
 
     unless ($opt_n){
 	copyattrib($spath, $dpath, $mode, $uid, $gid, $atime, $mtime);
-	$opt_v and do_log(sprintf "0%04o,%s,%s $spath", ($mode & 07777), 
+	$opt_v and do_log(sprintf "0%04o,%s,%s $dpath", ($mode & 07777), 
 			  (getpwuid($uid))[0],(getgrgid($gid))[0] );
     }
 }
 
 if ($opt_r >= 2){
-    unlink "$Dst/$Psync_DB";
-    tie (my %db, 'DB_File', "$Dst/$Psync_DB",
-	 O_CREAT|O_RDWR, 0640, $DB_HASH)
-	or die "$Dst/$Psync_DB : $!";
+    # these are to make DB operation fast enough
+    my $hashinfo = DB_File::HASHINFO->new;
+    $hashinfo->{nelem} = scalar keys %Action;
+    $hashinfo->{bsize} = 1024; # MAXPATHLEN
+    $hashinfo->{cachesize} = 4 * 1024 * 1024;
+    tie (my %db, 'DB_File', $Psync_DB,  O_CREAT|O_RDWR, 0640, $hashinfo)
+	or die "$Psync_DB : $!";
     $opt_v and do_log("Using $Dst/$Psync_DB to store extra attributes.");
     my $count;
     while ( my ($k, $v) = each %Action){
-	$v >= 0 and $db{$k} = $Attribs{$k};
-	$count % 1000 == 0 and do_log("Stored $count items");
-	$count++;
+	if ($v >= 0){
+	    $db{$k} = $Attribs{$k};
+	    $count++ % 10000 == 0 and do_log("$count items stored.");
+	}
     }
     untie %db;
+    move $Psync_DB, "$Dst/$Psync_DB" or die "Can't move $Psync_DB";
 }
 
 sub copyattrib{
@@ -224,7 +240,7 @@ sub sig2txt{
 
 sub addsig{
     my ($path, $mode,$uid,$gid,$size,$atime,$mtime, $action) = @_;
-    my $sig  = pack("N2", (S_ISDIR($mode) ? 0 : $size), $mtime);
+    my $sig  = pack("N2", (S_ISREG($mode) ? $size : 0), $mtime);
     tied %Attribs or $Attribs{$path} = pack("N4", $mode, $uid, $gid, $atime);
     if ($opt_v > 3 and $action > 0){
 	do_log qq(was: ) . sig2txt($Signature{$path});
@@ -248,6 +264,11 @@ sub addsig{
 
 sub scantree {
     my ($root, $path, $action) = @_;
+    if ($opt_v){
+	$ScanCount % 8192 == 0 and  printf "\n%10d:", $ScanCount;
+	$ScanCount % 128  == 0 and  print  ".";
+	$ScanCount++;
+    }
     if ($path =~ $IgnorePat){
         addsig($path, 0, 0, 0, 0, 0, 0, $Del_Ignored);
         return;
@@ -359,27 +380,57 @@ And the resulting I<backup> volume is fully-bootable copy thereof.
 Note C<sudo> or root privilege is necessary to restore file
 ownership. 
 
+=cut
+
+HFS+ on Pismo's Expansion Bay
+
+     2539.48 real       121.97 user       290.78 sys
+      452.98 real        47.29 user        39.38 sys
+
+UFS on Pismo's Expansion Bay
+     9278.25 real       775.60 user       667.82 sys
+     1086.35 real        69.19 user        53.68 sys
+
+HFS+ Disk Image on AFP Volume
+
+     3127.60 real       217.51 user       445.04 sys
+     1059.37 real        69.80 user        52.00 sys
+
+DVD-RAM formatted as  HFS+
+    12258.39 real       210.52 user       441.67 sys
+      564.49 real        62.47 user        46.65 sys
+
+
+NFS
+    13227.76 real       429.44 user       583.40 sys
+     2348.72 real        83.87 user        88.10 sys
+
+
 =head1 PERFORMANCE
 
 On PowerBook G3 (pismo) with G3/400, 384MB Memory,  I tested with
 C</usr/bin/time -l sudo psync -d / /Volumes/backup>.  The boot volume
 contains no more than vanilla OS X 10.1.2 and Developer kit.  It
-had a little over 85000 items and 1.5 GB of used space.  Here is
+had a little over 10000 items and 1.8 GB of used space.  Here is
 the result;
 
      1st run
      2539.48 real       121.97 user       290.78 sys
-     Following run
+     run that immedeately follows
       452.98 real        47.29 user        39.38 sys
 
 Note screensaver was on with some other background programs.  I used
-this program happily with my PowerBook G4 while I am surfing the web
+this program happily with my PowerBook G4 (Ti) while I am surfing the web
 and listening to iTunes at the same time letting SETI@Home search for
 cosmic programmers :)  With MacOS X, background backup is no problem
 
 =head1 FILES
 
-B<.psync.db>  Berkeley DB file used to store ownership and permission
+=over 4
+
+=item .psync.db
+
+Berkeley DB Hash file used to store ownership and permission
 information when -r option is set.
 
 =head1 BUGS
@@ -391,16 +442,18 @@ backup files with Korean and Chinese names.  AFP is also vulnerable to
 file names that are longer than 31 bytes.
 
 Most NFS servers do not have this problem so if you backup MacOS X
-boot volume onto remote server, use NFS or disk image.
+boot volume onto remote servers, use NFS or disk image.
 
-In theory the backup also works on WebDAV and SAMBA but they remain
+In theory the backup also works on WebDAV and SMB but they remain
 untested.
 
 =head1 DISCLAIMER
 
-The author of this utility will be held no responsibility for possible
-damages and losses of data and/or files caused by the use thereof.
-Use me at your own risk.
+The author of this utility will be held no responsibility for any
+damages and losses of data and/or files that may be caused by the use
+thereof.
+
+B<Use me at your own risk!>
 
 =head1 AUTHOR
 

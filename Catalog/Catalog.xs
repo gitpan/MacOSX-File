@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.xs,v 0.50 2002/01/18 18:30:49 dankogai Exp $
+ * $Id: Catalog.xs,v 0.60 2002/01/27 16:43:17 dankogai Exp dankogai $
  */
 
 #include "EXTERN.h"
@@ -45,12 +45,12 @@ xs_getcatalog(char *path){
     }
 
     ret[0] = sv_2mortal(newSVpv((char *)&Ref, sizeof(Ref)));
-    ret[1] = sv_2mortal(newSViv(Catalog.nodeFlags));
+    ret[1] = sv_2mortal(newSVuv(Catalog.nodeFlags));
     ret[2] = sv_2mortal(newSViv(Catalog.volume));
-    ret[3] = sv_2mortal(newSViv(Catalog.parentDirID));
-    ret[4] = sv_2mortal(newSViv(Catalog.nodeID));
-    ret[5] = sv_2mortal(newSViv(Catalog.sharingFlags));
-    ret[6] = sv_2mortal(newSViv(Catalog.userPrivileges));
+    ret[3] = sv_2mortal(newSVuv(Catalog.parentDirID));
+    ret[4] = sv_2mortal(newSVuv(Catalog.nodeID));
+    ret[5] = sv_2mortal(newSVuv(Catalog.sharingFlags));
+    ret[6] = sv_2mortal(newSVuv(Catalog.userPrivileges));
 
     /*
     ret[] = sv_2mortal(newSViv(Catalog.reserved1));
@@ -67,7 +67,7 @@ xs_getcatalog(char *path){
 
     /* permission is stored as arrayref */
     for (i = 0; i < 4; i++){
-	permissions[i] = sv_2mortal(newSViv(Catalog.permissions[i]));
+	permissions[i] = sv_2mortal(newSVuv(Catalog.permissions[i]));
     }
     ret[12] = sv_2mortal(newRV_noinc((SV*)av_make(4, permissions)));
 
@@ -75,7 +75,7 @@ xs_getcatalog(char *path){
 
     finderInfo[0] = sv_2mortal(newSVpv((char *)fip, 4));      /* type */
     finderInfo[1] = sv_2mortal(newSVpv((char *)(fip+4), 4));  /* creator */
-    finderInfo[2] = sv_2mortal(newSViv(fip->fdFlags));
+    finderInfo[2] = sv_2mortal(newSVuv(fip->fdFlags));
 
     fdLocation[0] = sv_2mortal(newSViv(fip->fdLocation.v));
     fdLocation[1] = sv_2mortal(newSViv(fip->fdLocation.h));
@@ -94,15 +94,16 @@ xs_getcatalog(char *path){
     ret[14] = sv_2mortal(newRV_noinc((SV*)av_make(5, extFinderInfo)));
 
     /* size of forks are stored in IV */
+    /* to store 64bit value, we use NV instead of IV */
 
-    ret[15] = sv_2mortal(newSViv(Catalog.dataLogicalSize));
-    ret[16] = sv_2mortal(newSViv(Catalog.dataPhysicalSize));
-    ret[17] = sv_2mortal(newSViv(Catalog.rsrcLogicalSize));
-    ret[18] = sv_2mortal(newSViv(Catalog.rsrcPhysicalSize));
+    ret[15] = sv_2mortal(newSVnv(Catalog.dataLogicalSize));
+    ret[16] = sv_2mortal(newSVnv(Catalog.dataPhysicalSize));
+    ret[17] = sv_2mortal(newSVnv(Catalog.rsrcLogicalSize));
+    ret[18] = sv_2mortal(newSVnv(Catalog.rsrcPhysicalSize));
     
     /* these are UInt32 */
-    ret[19] = sv_2mortal(newSViv(Catalog.valence));
-    ret[20] = sv_2mortal(newSViv(Catalog.textEncodingHint));
+    ret[19] = sv_2mortal(newSVuv(Catalog.valence));
+    ret[20] = sv_2mortal(newSVuv(Catalog.textEncodingHint));
 
     /* now return the result */
     return newRV_noinc((SV *)(av_make(21, ret)));
@@ -144,7 +145,7 @@ xs_setcatalog(SV* self, char *path){
 
     /* Now Let's set Catalog one by one */
 
-    if (svh = av_fetch(arg, 1, 0)) Catalog.nodeFlags = SvIV(*svh);
+    if (svh = av_fetch(arg, 1, 0)) Catalog.nodeFlags = SvUV(*svh);
 
     /* dates */
     if (svh = av_fetch(arg, 7, 0))
@@ -163,7 +164,7 @@ xs_setcatalog(SV* self, char *path){
 	permissions = (AV *)SvRV(*svh);
 	for (i = 0; i < 4; i++){
 	    if (svh = av_fetch(permissions, i, 0))
-		Catalog.permissions[i] = SvIV(*svh);
+		Catalog.permissions[i] = SvUV(*svh);
 	}
     }
 
@@ -176,7 +177,7 @@ xs_setcatalog(SV* self, char *path){
 	if (svh = av_fetch(finderInfo, 1, 0))
 	    fip->fdCreator = char2OSType(SvPVX(*svh));
 	if (svh = av_fetch(finderInfo, 2, 0)) 
-	    fip->fdFlags = SvIV(*svh);
+	    fip->fdFlags = SvUV(*svh);
 	/* fdLocation */
 	if (svh = av_fetch(finderInfo, 3, 0)){
 	    fdLocation = (AV *)SvRV(*svh); 
@@ -199,7 +200,7 @@ xs_setcatalog(SV* self, char *path){
     }
 
     /* And at last, textEncodingHint */
-    if (svh = av_fetch(arg, 20, 0)) Catalog.textEncodingHint = SvIV(*svh);
+    if (svh = av_fetch(arg, 20, 0)) Catalog.textEncodingHint = SvUV(*svh);
 
     /* now set it! */
     if (err = FSSetCatalogInfo(rp,

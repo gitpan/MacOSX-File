@@ -5,8 +5,8 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Spec.pm,v 0.50 2002/01/18 18:30:51 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 0.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Spec.pm,v 0.60 2002/01/27 16:43:19 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.60 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG;
 
 require Exporter;

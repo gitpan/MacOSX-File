@@ -1,6 +1,15 @@
 #
-# $Id: Changes,v 0.52 2002/01/20 06:23:08 dankogai Exp dankogai $
+# $Id: Changes,v 0.60 2002/01/27 16:43:18 dankogai Exp dankogai $
 #
+0.60  2002.01.28
+      ! */*.xs
+        * (data|rsrc)(Logical|Physical)size is now NV instead of IV
+	to accomodate 64bit values (same trick done in stat->size in
+	Perl's stat cache)
+        * Other members of FSCatalogInfo is now more compliant with
+	Inside Macintosh (UV instead of IV where appropriate)
+      ! bin/psync
+        * cosmetic changes for opt_v
 0.52  2002.01.20
       ! bin/psync
         Code optimization

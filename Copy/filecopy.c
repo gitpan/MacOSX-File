@@ -1,5 +1,5 @@
 /*
- * $Id: filecopy.c,v 0.51 2002/01/19 15:59:54 dankogai Exp $
+ * $Id: filecopy.c,v 0.60 2002/01/27 16:43:18 dankogai Exp dankogai $
  */
 
 #include <Files.h>

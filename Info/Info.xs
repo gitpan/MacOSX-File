@@ -1,5 +1,5 @@
 /*
- * $Id: Info.xs,v 0.50 2002/01/18 18:30:50 dankogai Exp $
+ * $Id: Info.xs,v 0.60 2002/01/27 16:43:19 dankogai Exp dankogai $
  */
 
 #include "EXTERN.h"
@@ -64,7 +64,7 @@ xs_getfinfo(char *path){
 	sva[3] =  sv_2mortal(newSVpv(Catalog.finderInfo+4, 4));
     }
 
-    sva[4] =  sv_2mortal(newSViv(finfo->fdFlags));
+    sva[4] =  sv_2mortal(newSVuv(finfo->fdFlags));
 
     sva[5] =  sv_2mortal(newSVnv(UDT2D(&Catalog.createDate)));
     sva[6] =  sv_2mortal(newSVnv(UDT2D(&Catalog.contentModDate)));
