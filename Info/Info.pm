@@ -20,13 +20,13 @@ does within perl.
 
 =cut
 
-use 5.6.0;
+use 5.006;
 use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Info.pm,v 0.67 2004/05/03 14:53:30 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 0.67 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Info.pm,v 0.68 2004/08/05 03:18:15 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.68 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG;
 
 require Exporter;

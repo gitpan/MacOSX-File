@@ -1,7 +1,12 @@
 #
-# $Id: Changes,v 0.68 2004/05/25 16:03:23 dankogai Exp dankogai $
+# $Id: Changes,v 0.69 2004/08/05 03:18:15 dankogai Exp dankogai $
 #
-$Revision: 0.68 $ $Date: 2004/05/25 16:03:23 $
+
+$Revision: 0.69 $ $Date: 2004/08/05 03:18:15 $
+! File.pm Catalog/Catalog.pm Spec/Spec.pm Copy/Copy.pm Info/Info.pm
+  s/use 5.6.0;/use 5.006;/ so v-string warning on 5.8.1-RC3 is quiet.
+
+0.68 2004/05/25 16:03:23
 ! Catalog/Makefile.PL Info/Makefile.PL Copy/Makefile.PL Spec/Makefile.PL
   Now uses gcc2 when perl version is 5.8.1 or before  so it compiles
   without 'make CC=gcc2' on Apple-bundled /usr/bin/perl
