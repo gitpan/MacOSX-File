@@ -1,21 +1,35 @@
 #!/usr/local/bin/perl
 #
-# $Id: psync,v 0.50 2002/01/18 18:30:51 dankogai Exp dankogai $
+# $Id: psync,v 0.51 2002/01/19 15:59:56 dankogai Exp dankogai $
 #
 
 use strict;
 use Getopt::Long;
+use Fcntl;
+use DB_File;
 use MacOSX::File::Copy;
-use MacOSX::File::Catalog;
+use MacOSX::File::Info;
 use Fcntl qq(:mode);
 my $Debug = 0;
+my $Psync_DB = '.psync.db';
 
-my ($opt_v, $opt_n, $opt_q);
+my (
+    $opt_d,
+    $opt_f,
+    $opt_n,
+    $opt_r,
+    $opt_q, 
+    $opt_v, 
+    );
+
 Getopt::Long::Configure("bundling");
 GetOptions(
-           "v:i" => \$opt_v,
+           "d:n" => \$opt_d,
+	   "f"   => \$opt_f,
            "n"   => \$opt_n,
+	   "r"   => \$opt_r,
 	   "q"   => \$opt_q,
+           "v:i" => \$opt_v,
            );
 
 $opt_v ||= 1;
@@ -34,6 +48,7 @@ my $IgnorePat =
 
 my %IgnoreFiles = map { $_ => 1 }
 (
+ $Psync_DB,
  '.DS_Store',
  '.FBCIndex',
  '.FBCLockFolder',
@@ -45,6 +60,8 @@ my %IgnoreFiles = map { $_ => 1 }
  'TheVolumeSettingsFolder',
  );
 
+my $Del_Ignored = $opt_d > 1 ? -1 : 0;
+
 my $Topdev;
 # Maybe we should tie them to DB_File to save memory
 my (%Signature, %Attribs, %Action, %Root) = ();
@@ -55,6 +72,18 @@ $|=1; #autoflush
 my $Dst = pop @ARGV;
 -d $Dst or help();
 scalar @ARGV >= 1 or help();
+if ($opt_r){
+    scalar @ARGV != 1 and help();
+    if (-f "$ARGV[0]/$Psync_DB"){ # remote restore mode
+	$opt_v and 
+	    do_log("Using $ARGV[0]/$Psync_DB to retrieve extra attributes.");
+	tie (%Attribs, 'DB_File', "$ARGV[0]/$Psync_DB",
+	     O_RDONLY, 0440, $DB_HASH) or die "$Dst/$Psync_DB : $!";
+	$opt_r = 1;
+    }else{
+	$opt_r = 2;               # remote backup mode
+    }
+}
 
 $opt_v and do_log("Scanning Destination Directory $Dst ...");
 $Topdev = (lstat($Dst))[0];
@@ -80,28 +109,29 @@ if ($opt_v){
     do_log(sprintf "%8d items unchanged,", $n_unchg);
     do_log(sprintf "%8d items to copy.", $n_copy);
 }
-$opt_v and do_log("deleting items ...");
-# sort must be this order for depth-first traversal
-for my $k (sort {$b cmp $a} keys %Action){
-    $k or next; $Action{$k} <  0 or next;
-    my $dpath = $Dst . $k;
-    $opt_v and do_log("- $dpath");
-    unless ($opt_n){
-	-e $dpath or next;
-	unlink $dpath or rmdir $dpath or warn "$dpath : $!";
+if ($opt_d){
+    $opt_v and do_log("deleting items ...");
+    # sort must be this order for depth-first traversal
+    for my $k (sort {$b cmp $a} keys %Action){
+	$k or next; $Action{$k} <  0 or next;
+	my $dpath = $Dst . $k;
+	$opt_v and do_log("- $dpath");
+	unless ($opt_n){
+	    -e $dpath or next;
+	    unlink $dpath or rmdir $dpath or warn "$dpath : $!";
+	}
     }
 }
 $opt_v and do_log("copying items ...");
 # sort must be this order for depth-last traversal
 for my $k (sort keys %Action){
-    $k or next; 
     my $spath = $Root{$k} . $k; $spath =~ s,^/+,/,o;
     my $dpath = $Dst . $k;
     $Action{$k} == 0 and $opt_v > 1 and do_log("== $spath");
     $Action{$k} >  0 or next;
     unless ($opt_n){
-	my ($mode, $size, $mtime)  = unpack("N3", $Signature{$k});
-	my ($uid,  $gid,  $atime)  = unpack("N3", $Attribs{$k});
+	my ($size, $mtime)                = unpack("N2", $Signature{$k});
+	my ($mode, $uid,  $gid,  $atime)  = unpack("N4", $Attribs{$k});
 	if     (S_ISDIR($mode)){ # -d
 	    unless (-d $dpath){
 		$opt_v and do_log("+d $spath");
@@ -111,44 +141,54 @@ for my $k (sort keys %Action){
 	    }
 	}elsif (S_ISREG($mode)){ # -f
 	    $opt_v and do_log("+f $spath");
-	    copy ($spath, $dpath, undef, 1)
-		or warn "$spath -> $dpath : $MacOSX::File::OSErr";
-	    chmod $mode & 07777, $dpath;
-	    chown $uid,   $gid,  $dpath;
-	    # my $catalog = getcatalog($spath);
-	    # $catalog and $catalog->set($dpath);
-	    utime $atime, $mtime,  $dpath;
+	    copy ($spath, $dpath)
+		or warn "$spath -> $dpath : $MacOSX::File::CopyErr";
+	    copyattrib($spath, $dpath, $mode, $uid, $gid, $atime, $mtime);
 	}elsif (S_ISLNK($mode)){ # -l
 	    $opt_v and do_log("+l $spath");
 	    unlink $dpath;
 	    symlink(readlink($spath), $dpath);
 	}
-	unless (S_ISLNK($mode)){
-	    chown $uid, $gid, $dpath or warn "$dpath : $!";
- 	}
     }
 }
 $opt_v and do_log("fixing directory permissions ...");
 # sort must be this order for depth-first traversal
 for my $k (sort {$b cmp $a} keys %Action){
-    $k or next;
     $Action{$k} >  0 or next;
-    my ($mode,$size,$mtime)  = unpack("N3", $Signature{$k});
+    my ($size, $mtime)                = unpack("N2", $Signature{$k});
+    my ($mode, $uid,  $gid,  $atime)  = unpack("N4", $Attribs{$k});
     S_ISDIR($mode) or next;  # -d
     my $spath = $Root{$k} . $k; $spath =~ s,^/+,/,o;
     my $dpath = $Dst . $k;
-    my ($uid,$gid,$atime)   = unpack("N3", $Attribs{$k});
+
     unless ($opt_n){
+	copyattrib($spath, $dpath, $mode, $uid, $gid, $atime, $mtime);
+	$opt_v and do_log(sprintf "0%04o,%s,%s $spath", ($mode & 07777), 
+			  (getpwuid($uid))[0],(getgrgid($gid))[0] );
+    }
+}
+if ($opt_r == 2){
+    unlink "$Dst/$Psync_DB";
+    tie (my %db, 'DB_File', "$Dst/$Psync_DB",
+	 O_CREAT|O_RDWR|O_EXLOCK|O_NONBLOCK, 0640, $DB_HASH)
+	or die "$Dst/$Psync_DB : $!";
+    opt_v and do_log("Using $Dst/$Psync_DB to store extra attributes.");
+    my $count;
+    while ( my ($k, $v) = each %Action){
+	$v >= 0 and $db{$k} = $Attribs{$k};
+	$count++ % 1000 == 0 and warn $count;
+    }
+    untie %db;
+}
+
+sub copyattrib{
+    my ($spath, $dpath, $mode, $uid, $gid, $atime, $mtime) = @_;
+    my $finfo = getfinfo($spath);
+    $finfo and $finfo->set($dpath);
+    unless ($opt_r > 1){
 	chmod $mode & 07777, $dpath;
-	chown $uid, $gid,    $dpath;
-	my $catalog = getcatalog($spath);
-	$catalog and $catalog->set($dpath);
+	chown $uid,   $gid,  $dpath;
 	utime $atime, $mtime,  $dpath;
-	$opt_v and do_log(sprintf "0%04o,%s,%s, $spath", 
-			  ($mode & 07777),
-			  (getpwuid($uid))[0],
-			  (getgrgid($gid))[0],
-			  );
     }
 }
 
@@ -158,19 +198,19 @@ sub do_log{
 }
 
 sub sig2txt{
-    return sprintf("0x%08x,0x%08x,0x%08x",unpack("N3",shift));
+    return sprintf("0x%08x,0x%08x",unpack("N2",shift));
 }
 
 sub addsig{
     my ($path, $mode,$uid,$gid,$size,$atime,$mtime, $action) = @_;
-    my $sig         = pack("N3", $mode, $size, $mtime);
-    $Attribs{$path} = pack("N3", $uid, $gid, $atime);
+    my $sig         = pack("N2", $size, $mtime);
+    tied %Attribs or $Attribs{$path} = pack("N4", $mode, $uid, $gid, $atime);
     if ($opt_v > 3 and $action > 0){
 	do_log qq(was: ) . sig2txt($Signature{$path});
 	do_log qq(now: ) . sig2txt($sig);
     }
     if ($Signature{$path} eq $sig){
-        $action = 0;               # same file
+        $opt_f or $action = 0;     # same file
     }else{
         $Signature{$path} =  $sig; # different
     }
@@ -178,7 +218,7 @@ sub addsig{
     $opt_v > 2 and 
 	do_log(join("," => $Action{$path},
 		    sprintf("0x%08x,0x%08x,0x%08x", 
-			    unpack("N3",$Signature{$path})),
+			    unpack("N2",$Signature{$path})),
 		    $path));
 }
 
@@ -188,7 +228,7 @@ sub addsig{
 sub scantree {
     my ($root, $path, $action) = @_;
     if ($path =~ $IgnorePat){
-        addsig($path, 0, 0, 0, 0, 0, 0, -2);
+        addsig($path, 0, 0, 0, 0, 0, 0, $Del_Ignored);
         return;
     }
     $action > 0 and $Root{$path} = $root;
@@ -207,7 +247,8 @@ sub scantree {
         for my $f (@f){
             my $spath = "$path/$f";
             if ($IgnoreFiles{$f}){
-                addsig($spath, $mode, $uid, $gid, $size, $mtime, $atime, -3);
+                addsig($spath, $mode, $uid, $gid, $size, $mtime, $atime, 
+		       $Del_Ignored) unless $f eq $Psync_DB;
             }else{
                 scantree($root, $spath, $action);
             }
@@ -217,7 +258,8 @@ sub scantree {
 
 sub help{
     print <<"EOT";
-psync [-n][-q|-v] source_items ... target_directory
+psync   [-d][-n][-q|-v] source_items ... target_directory
+psync -r[-d][-n][-q|-v] source_directory target_directory
 EOT
 exit;
 }
@@ -235,13 +277,39 @@ psync -- update copy
 
 psync does an update copy.  It compares source directory and target
 directory at first, then erases items that are nonexistent on source
-directory and finally copies everything on source directory.  Items
-items with the same modification date and (data fork) size remain
+directory if specified and finally copies everything on source directory.
+Items with the same modification date and (data fork) size remain
 untouched, saving time on operation.
 
 Currently psync supports options below
 
 =over 4
+
+=item -r
+
+Remote backup/restore mode.  Ownership and permissions are
+stored/retrieved via C<.psync.db>
+
+If the source directory contains a file C<.psync.db>, psync
+turns into remote restore mode.  It uses .psync.db on source
+directory to restore ownership and permissions.
+
+If not, psync turns into remote backup mode.  After the backup
+it stores ownership and permissions to C<.psync.db>
+
+As the name suggests, this option is imperative when the backup
+directory is on remote volume such as AFP, NFS, and Samba.
+
+=item -dI<n>
+
+Delete nonexistent files before starting copy.  If the number larger
+than 2 is specified, it also deletes ignored files.
+
+CAVEAT:  Prior to 0.50 this option was default.
+
+=item -f
+
+Force copy.  Copy files even when the file remains unchanged.
 
 =item -n
 
@@ -264,7 +332,7 @@ Quiet mode.  Sets verbose level to 0.
 
 To backup everything in startup volume, all you have to say is
 
-  sudo psync / /Volumes/I<backup>
+  sudo psync -d / /Volumes/I<backup>
 
 And the resulting I<backup> volume is fully-bootable copy thereof.
 Note C<sudo> or root privilege is necessary to restore file
@@ -273,7 +341,7 @@ ownership.
 =head1 PERFORMANCE
 
 On PowerBook G3 (pismo) with G3/400, 384MB Memory,  I tested with
-C</usr/bin/time -l sudo psync / /Volumes/backup>.  The boot volume
+C</usr/bin/time -l sudo psync -d / /Volumes/backup>.  The boot volume
 contains no more than vanilla OS X 10.1.2 and Developer kit.  It
 had a little over 85000 items and 1.5 GB of used space.  Here is
 the result;
@@ -288,15 +356,24 @@ this program happily with my PowerBook G4 while I am surfing the web
 and listening to iTunes at the same time letting SETI@Home search for
 cosmic programmers :)  With MacOS X, background backup is no problem
 
+=head1 FILES
+
+B<.psync.db>  Berkeley DB file used to store ownership and permission
+information when -r option is set.
+
 =head1 BUGS
 
-Using this utility over network such as AFS and NFS don't work well
-because of file permissions.  There are several ways to overcome this
-problem but for the time being it is not implemented.
+Backing up to AFP volume may lose some files with Unicode names other
+than the language you specified when you mount the volume.  That is,
+When you mount the volume with "Japanese" support,  You may fail to 
+backup files with Korean and Chinese names.  AFP is also vulnerable to
+file names that are longer than 31 bytes.
 
-On the other hand this utility works very well on not only HFS+ but
-also UFS.  It even works with on disk images so backup over AFS is
-still possible in theory by making a huge disk image on an AFS volume.
+Most NFS servers do not have this problem so if you backup MacOS X
+boot volume onto remote server, use NFS or disk image.
+
+In theory the backup also works on WebDAV and SAMBA but they remain
+untested.
 
 =head1 DISCLAIMER
 

@@ -1,6 +1,11 @@
 #
-# $Id: Changes,v 0.50 2002/01/18 18:30:49 dankogai Exp dankogai $
+# $Id: Changes,v 0.51 2002/01/19 15:59:54 dankogai Exp dankogai $
 #
+0.51  2002.01.20
+      ! bin/psync
+        Greatly enhanced.  See the manual for details
+      ! Copy/filecopy.c
+        More housekeeping functions added
 0.50  2002.01.19
       ! Makefile.PL
         INSTALLSCRIPT  => /usr/local/bin

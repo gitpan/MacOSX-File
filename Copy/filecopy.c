@@ -1,9 +1,24 @@
 /*
- * $Id: filecopy.c,v 0.50 2002/01/18 18:30:50 dankogai Exp dankogai $
+ * $Id: filecopy.c,v 0.51 2002/01/19 15:59:54 dankogai Exp dankogai $
  */
 
 #include <Files.h>
 #include "common/util.c"
+
+#ifdef _INC_PERL_XSUB_H
+static int
+setcopyerr(int err, char *filename, int line)
+{
+    SV *OSerr;
+    OSerr = perl_get_sv("MacOSX::File::CopyErr", 1);
+    if (err){
+        sv_setpvf(OSerr, "err=%d,file=%s,line=%d", err, filename, line);
+    }else{
+	sv_setiv(OSerr, 0);
+    }
+    return err;
+}
+#endif /* _INC_PERL_XSUB_H */
 
 static UniCharCount 
 Utf8toUni(UInt8 *src, UniChar *dst){
@@ -36,16 +51,22 @@ newfile(char *path, FSRef *FSrefp, FSCatalogInfo *Catp){
     OSErr err;
 
     if (err = FSPathMakeRef(dirname(path), &parentFS, &isDir)){
-	return err;
+	return setcopyerr(err, __FILE__, __LINE__);
     }
     if ((namelen = Utf8toUni(colon2slash(basename(path)), name)) == 0){
 	return fnfErr;
     }
-    err = FSCreateFileUnicode(&parentFS, 
-			      namelen, name,
-			      kFSCatInfoSettableInfo, Catp,
-			      FSrefp, NULL);
-    return err;
+    
+    /* Create the file with same finder info  */
+    err =  FSCreateFileUnicode(&parentFS,
+			       namelen, name,
+			       kFSCatInfoFinderInfo, Catp,
+			       FSrefp, NULL);
+    if (err == paramErr){
+	/* Try reestablishing FSRef; file is created already */
+	err == FSPathMakeRef(path, FSrefp, NULL);
+    }
+    return setcopyerr(err, __FILE__, __LINE__);
 }
 
 #define MINCOPYBUFSIZE 4096
@@ -111,13 +132,13 @@ copyfork(HFSUniStr255 *forkName, FSRef *src, FSRef *dst){
     if (err = FSOpenFork(src, forkName->length, forkName->unicode,
 			 fsRdPerm, &srcfork)){ 
 	fpf(stderr, "Cannot open src. fork\n");
-	return err; 
+	return setcopyerr(err, __FILE__, __LINE__); 
     }
     if (err = FSOpenFork(dst, forkName->length, forkName->unicode,
 			 fsWrPerm, &dstfork)){ 
 	fpf(stderr, "Cannot open dst. fork\n");
 	FSCloseFork(srcfork); /* src fork is already open ! */
-	return err; 
+	return setcopyerr(err, __FILE__, __LINE__); 
     }
     while(1){
 	eof = FSReadFork(srcfork, fsAtMark, 0, CopyBuf.s, CopyBuf.b, &nread);
@@ -130,7 +151,7 @@ copyfork(HFSUniStr255 *forkName, FSRef *src, FSRef *dst){
  CLOSE:
     FSCloseFork(srcfork);
     FSCloseFork(dstfork);
-    return err;
+    return setcopyerr(err, __FILE__, __LINE__);
 }
 
 #define min(x, y) ((x) < y) ? (x) : (y)

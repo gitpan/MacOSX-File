@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $Id: pcpmac,v 0.50 2002/01/18 18:30:51 dankogai Exp dankogai $
+# $Id: pcpmac,v 0.51 2002/01/19 15:59:56 dankogai Exp dankogai $
 #
 
 use strict;
@@ -30,7 +30,7 @@ unless (-d _){
 exit;
 
 use MacOSX::File::Copy;
-use MacOSX::File::Catalog;
+use MacOSX::File::Info;
 
 sub do_copy{
     my ($src, $dst) = @_;
@@ -45,7 +45,7 @@ sub do_copy{
 	$Opt{f} and unlink $dst;	
     }
 
-    my $srcst = lstat($src);
+    $srcst = lstat($src);
     if    (-l _){ # just copy the linkage
 	symlink(readlink($src), $dst) or warn "$src -> $dst : $!";
     }elsif(-f _){ 
@@ -76,7 +76,7 @@ sub do_copy{
 	# see ._* is avoided
 	my @f = grep !/^\.(?:\.?$|_)/o, readdir $d;
 	closedir $d;
-	my $catalog = getcatalog($src)
+	my $finfo = getfinfo($src)
 	    or die "$src:Error $MacOSX::File::OSErr";
 	for my $f (@f){
 	    my ($srcf, $dstf) = ("$src/$f", "$dst/$f");
@@ -87,8 +87,8 @@ sub do_copy{
 	    # else lets' do it recursively
 	    do_copy($srcf, $dstf);
 	}
-	# copy catalog info after all traversal is done
-	$catalog->set($dst) or warn "$dst : $MacOSX::File::OSErr";
+	# copy finfo info after all traversal is done
+	$finfo->set($dst) or warn "$dst : $MacOSX::File::OSErr";
 	# set attributes
 	if ($Opt{p}){
 	    chown $srcst->uid, $srcst->gid, $dst; 

@@ -3,8 +3,8 @@ package MacOSX::File;
 use 5.6.0;
 use strict;
 
-our $RCSID = q$Id: File.pm,v 0.50 2002/01/18 18:30:50 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.50 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: File.pm,v 0.51 2002/01/19 15:59:55 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.51 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 our $OSErr;
 
@@ -34,6 +34,14 @@ without calling these binaries.
   MacOSX::File::Copy       - copy/move with HFS(+) attributes
   MacOSX::File::Info       - Gets/Sets File Attributes (Subset of ::Catalog)
   MacOSX::File::Spec       - Gets FSSpec Structure
+
+=head1 SCRIPTS
+
+  pcpmac     - CpMac reimplemented
+  pmvmac     - MvMac reimplemented
+  pgetfinfo  - GetFileInfo reimplemented
+  psetfinfo  - SetFile reimplemented
+  psync      - update copy utility, very reason I wrote this module
 
 =head1 INSTALLATION
 

@@ -1,5 +1,5 @@
 /*
- * $Id: macdate.c,v 0.50 2002/01/18 18:30:51 dankogai Exp dankogai $
+ * $Id: macdate.c,v 0.50 2002/01/18 18:30:51 dankogai Exp $
  */
 
 #include <DateTimeUtils.h>
