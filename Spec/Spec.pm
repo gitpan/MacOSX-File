@@ -5,8 +5,8 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Spec.pm,v 0.60 2002/01/27 16:43:19 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 0.60 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Spec.pm,v 0.61 2002/03/07 07:37:32 dankogai Exp $;
+our $VERSION = do { my @r = (q$Revision: 0.61 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG;
 
 require Exporter;
@@ -33,6 +33,7 @@ our @EXPORT = qw(
 		 );
 
 bootstrap MacOSX::File::Spec $VERSION;
+use MacOSX::File;
 
 sub path2spec { MacOSX::File::Spec->new(@_) }
 

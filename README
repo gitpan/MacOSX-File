@@ -1,5 +1,5 @@
 #
-# $Id: README,v 0.60 2002/01/27 16:43:19 dankogai Exp $
+# $Id: README,v 0.61 2002/03/07 07:40:47 dankogai Exp $
 #
 
 NAME
@@ -34,7 +34,6 @@ INSTALLATION
 
 DEPENDENCIES
     This module requires MacOS X. Develper kit is needed to "make install".
-    To get binary distribution, check MacOSX-File-binary via CPAN.
 
 COPYRIGHT AND LICENCE
     Copyright 2002 Dan Kogai <dankogai@dan.co.jp>

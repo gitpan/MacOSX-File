@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.xs,v 0.61 2002/01/28 07:43:58 dankogai Exp dankogai $
+ * $Id: Catalog.xs,v 0.62 2002/03/07 07:37:31 dankogai Exp $
  */
 
 #include "EXTERN.h"
@@ -143,6 +143,20 @@ xs_setcatalog(SV* self, char *path){
 	return seterr(err);
     }
 
+    /* 
+     * unlock the file first.
+     * Note FSp(Rst|Set)FLock dies with segfault when applied to
+     * directories! 
+     */
+
+    FSRef2FSSpec(rp, &Spec);
+
+    if (!(Catalog.nodeFlags & kFSNodeIsDirectoryMask)){
+	if (err = FSpRstFLock(&Spec)){
+	    return seterr(err);
+	}
+    }
+
     /* Now Let's set Catalog one by one */
 
     if (svh = av_fetch(arg, 1, 0)) Catalog.nodeFlags = SvUV(*svh);
@@ -210,16 +224,14 @@ xs_setcatalog(SV* self, char *path){
 	return seterr(err);
     }
     
-    /* 
-     * now restore the lock state iff it's a file 
-     * FSp(Rst|Set)FLock dies with segfault when applied to
-     * directories! 
-     */
+    /* Lock the File if neccesary */
+
     if (!(Catalog.nodeFlags & kFSNodeIsDirectoryMask)){
-	FSRef2FSSpec(rp, &Spec);
-	err = Catalog.nodeFlags & kFSNodeLockedMask ? 
-	    FSpSetFLock(&Spec) : FSpRstFLock(&Spec) ;
+	if (Catalog.nodeFlags & kFSNodeLockedMask){
+	    err = FSpSetFLock(&Spec);
+	}
     }
+
     return seterr(err);
 }
 

@@ -27,8 +27,8 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Catalog.pm,v 0.60 2002/01/27 16:43:17 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 0.60 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Catalog.pm,v 0.61 2002/03/07 07:37:30 dankogai Exp $;
+our $VERSION = do { my @r = (q$Revision: 0.61 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Exporter;
 require DynaLoader;
@@ -62,6 +62,7 @@ our @EXPORT = qw(
 		 );
 
 bootstrap MacOSX::File::Catalog $VERSION;
+use MacOSX::File;
 
 # Preloaded methods go here.
 

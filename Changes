@@ -1,6 +1,25 @@
 #
-# $Id: Changes,v 0.61 2002/01/28 07:43:58 dankogai Exp dankogai $
+# $Id: Changes,v 0.64 2002/03/07 08:18:03 dankogai Exp dankogai $
 #
+0.64  2002.03.07
+      ! bin/psync
+        ! uses MacOSX::File::Info instead of MacOSX::File::Catalog
+	  back again.
+        + pod improvement
+0.63  2002.03.07
+      ! File.pm README
+        Mention to binary distribution dropped;  I will release binary
+	distribution elsewhere.  CPAN infrastracture is not quite fit
+	for binary distribution.
+0.62  2002.03.07
+      ! File.pm
+	+ unlink() which overrides CORE::unlink that deletes '._file'
+	  if 'file' is deleted
+      ! Catalog/Catalog.xs Info/Info.xs
+        File Locking scheme changed so that it works on UFS volume
+        more correctly.  Now 'make test' on UFS volume works.
+      ! bin/psync
+        uses MacOSX::File::Catalog instead of MacOSX::File::Info
 0.61  2002.01.28
       ! Info/Info.xs Catalog/Catalog.xs
        * $obj->set() without argument failed

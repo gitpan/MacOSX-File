@@ -24,8 +24,8 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Copy.pm,v 0.60 2002/01/27 16:43:18 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 0.60 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Copy.pm,v 0.61 2002/03/07 07:37:31 dankogai Exp $;
+our $VERSION = do { my @r = (q$Revision: 0.61 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG;
 
 =head2 EXPORT
@@ -46,6 +46,7 @@ our @EXPORT = qw(
 		 );
 
 bootstrap MacOSX::File::Copy $VERSION;
+use MacOSX::File;
 
 our $MINBUFFERSIZE     = 4096;
 our $DEFAULTBUFFERSIZE = $MINBUFFERSIZE * 1024;

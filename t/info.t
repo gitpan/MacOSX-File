@@ -1,5 +1,5 @@
 #
-# $Id: info.t,v 0.60 2002/01/27 16:43:21 dankogai Exp $
+# $Id: info.t,v 0.61 2002/03/07 07:37:33 dankogai Exp $
 #
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
@@ -13,6 +13,7 @@ use strict;
 my $Debug = $ARGV[0] || 0;
 BEGIN { plan tests => 10 };
 
+use MacOSX::File;
 use MacOSX::File::Info;
 ok(1); # If we made it this far, we're ok.
 
@@ -44,7 +45,7 @@ $! = 0;
 $finfo->unlock;
 my $n;
 ok(setfinfo($finfo, "dummy"));
-$Debug and warn $n;
+$Debug and warn $MacOSX::File::OSErr;
 ok(unlink "dummy");
 $Debug and warn $!;
 
