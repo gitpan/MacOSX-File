@@ -1,5 +1,5 @@
 /*
- * $Id: util.c,v 0.60 2002/01/27 16:43:20 dankogai Exp $
+ * $Id: util.c,v 0.65 2003/01/19 17:53:21 dankogai Exp dankogai $
  */
 
 #ifndef _INC_UTIL_C_
@@ -69,7 +69,7 @@ basename(char *path){
 	for (i = 0; path[i] != '\0'; i++){
 	    if (path[i] == '/'){ len = i; }
 	}
-	strcpy(result, path+len+1);
+	strncpy(result, path+len+1, MAXPATHLEN);
     }
     return result;
 }

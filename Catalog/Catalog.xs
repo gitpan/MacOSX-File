@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.xs,v 0.62 2002/03/07 07:37:31 dankogai Exp $
+ * $Id: Catalog.xs,v 0.65 2003/01/19 17:53:21 dankogai Exp dankogai $
  */
 
 #include "EXTERN.h"
@@ -73,8 +73,8 @@ xs_getcatalog(char *path){
 
     /* finder info too, is stored as arrayref */
 
-    finderInfo[0] = sv_2mortal(newSVpv((char *)fip, 4));      /* type */
-    finderInfo[1] = sv_2mortal(newSVpv((char *)(fip+4), 4));  /* creator */
+    finderInfo[0] = sv_2mortal(newSVpv((char *)&fip->fdType, 4));
+    finderInfo[1] = sv_2mortal(newSVpv((char *)&fip->fdCreator, 4));
     finderInfo[2] = sv_2mortal(newSVuv(fip->fdFlags));
 
     fdLocation[0] = sv_2mortal(newSViv(fip->fdLocation.v));

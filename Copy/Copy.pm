@@ -24,8 +24,8 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Copy.pm,v 0.61 2002/03/07 07:37:31 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 0.61 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Copy.pm,v 0.64 2002/10/27 16:43:23 dankogai Exp $;
+our $VERSION = do { my @r = (q$Revision: 0.64 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG;
 
 =head2 EXPORT

@@ -1,6 +1,19 @@
 #
-# $Id: Changes,v 0.64 2002/03/07 08:18:03 dankogai Exp dankogai $
+# $Id: Changes,v 0.65 2003/01/19 17:53:21 dankogai Exp dankogai $
 #
+$Revision: 0.65 $ $Date: 2003/01/19 17:53:21 $
+    ! common/util.c
+      s/strcpy/strncpy/  I though I fixed it :)
+    ! Catalog/Catalog.xs
+      Guy Sabourin <guysab@videotron.ca> has reported that an evil typecast
+      found in the code above was preventing MacOSX::File::Catalog from
+      copying creator properly.  Though I could not duplicate his claim
+      on my environment (compiler difference?), his version is definitely
+      better.
+      Message-Id: <BA504461.3E6E%guysab@videotron.ca>
+      FYI, psync and other scripts that come with this package use
+      MacOSX::File::Info rather than MacOSX::File:Catalog in favor of speed
+      and memory so they are unaffected as of this release.
 0.64  2002.03.07
       ! bin/psync
         ! uses MacOSX::File::Info instead of MacOSX::File::Catalog
