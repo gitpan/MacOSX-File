@@ -24,6 +24,7 @@ bin/psetfinfo
 bin/psync
 common/macdate.c
 common/util.c
+t/AskGetFileInfo.pm
 t/benchmark.pl
 t/catalog.t
 t/copy.t

@@ -4,8 +4,8 @@ use 5.006;
 use strict;
 use Carp;
 
-our $RCSID = q$Id: File.pm,v 0.69 2004/08/05 03:18:15 dankogai Exp dankogai $;
-our $VERSION = do { my @r = (q$Revision: 0.69 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: File.pm,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.70 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Exporter;
 require DynaLoader;
@@ -44,6 +44,13 @@ __END__
 =head1 NAME
 
 MacOSX::File - A collection of modules to manipulate files on MacOS X
+
+=head1 TIGER
+
+As of Mac OS X v10.4 (Tiger), most of these operations with
+resource fork are supported by the ordinary (cp|mv|rsync).
+If you are looking for psync, you may as well consider using
+rsync -E instead.
 
 =head1 DESCRIPTION
 

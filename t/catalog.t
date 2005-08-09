@@ -1,5 +1,5 @@
 #
-# $Id: catalog.t,v 0.67 2004/05/03 14:53:30 dankogai Exp $
+# $Id: catalog.t,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $
 #
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
@@ -10,6 +10,8 @@
 
 use Test;
 use strict;
+use lib "t";
+use AskGetFileInfo;
 my $Debug = $ARGV[0] || 0;
 BEGIN { plan tests => 7 };
 
@@ -43,9 +45,3 @@ $Debug and warn $n;
 unlink "dummy" ? ok(1) : ok(0);
 $Debug and warn $!;
 $Debug or unlink "dummy";
-
-sub askgetfileinfo{
-    my $asked = qx(/Developer/Tools/GetFileInfo $_[0]);
-    $asked =~ /^attributes: (\w+)/mi;
-    return $1;
-}

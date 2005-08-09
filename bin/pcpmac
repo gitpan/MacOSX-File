@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $Id: pcpmac,v 0.67 2004/05/03 14:53:30 dankogai Exp $
+# $Id: pcpmac,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $
 #
 
 use strict;
@@ -130,6 +130,10 @@ pcpmac -- CpMac(1) or cp(1),  implemented as perl script
  pcpmac [-r] [-f|-i] [-p][-v] source_file target_file
  pcpmac [-r] [-f|-i] [-p][-v] source_file ... target_directory
 
+=head1 TIGER
+
+As of Mac OS X v10.4 (Tiger), the ordinary L<cp(1)> does support resource fork.
+
 =head1 DESCRIPTION
 
 pcpmac, as its name implies, copies files with finder info and
@@ -199,7 +203,7 @@ F</Developer/Tools/CpMac>
 
 =head1 COPYRIGHT
 
-Copyright 2002 Dan Kogai <dankogai@dan.co.jp>
+Copyright 2002-2005 Dan Kogai <dankogai@dan.co.jp>
 
-    This library is free software; you can redistribute it
+This library is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.

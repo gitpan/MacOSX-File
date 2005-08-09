@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 0.67 2004/05/03 14:53:30 dankogai Exp $
+# $Id: Makefile.PL,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $
 #
 
 $^O =~ /darwin/o or die "$^O is not darwin!";

@@ -15,8 +15,8 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Constants.pm,v 0.67 2004/05/03 14:53:30 dankogai Exp $;
-our $VERSION = do { my @r = (q$Revision: 0.67 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $RCSID = q$Id: Constants.pm,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $;
+our $VERSION = do { my @r = (q$Revision: 0.70 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Exporter;
 use AutoLoader;
