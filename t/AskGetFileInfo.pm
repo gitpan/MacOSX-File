@@ -1,5 +1,5 @@
 #
-# $Id: AskGetFileInfo.pm,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $
+# $Id: AskGetFileInfo.pm,v 0.70 2005/08/09 15:47:00 dankogai Exp $
 #
 sub askgetfileinfo{
     my $asked = qx(/Developer/Tools/GetFileInfo $_[0]);

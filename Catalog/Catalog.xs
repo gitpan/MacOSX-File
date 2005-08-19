@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.xs,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $
+ * $Id: Catalog.xs,v 0.70 2005/08/09 15:47:00 dankogai Exp $
  */
 
 #include "EXTERN.h"

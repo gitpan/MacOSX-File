@@ -27,7 +27,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $RCSID = q$Id: Catalog.pm,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $;
+our $RCSID = q$Id: Catalog.pm,v 0.70 2005/08/09 15:47:00 dankogai Exp $;
 our $VERSION = do { my @r = (q$Revision: 0.70 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Exporter;

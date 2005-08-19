@@ -1,7 +1,16 @@
 #
-# $Id: Changes,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $
+# $Id: Changes,v 0.71 2005/08/19 06:11:26 dankogai Exp $
 #
-$Revision: 0.70 $ $Date: 2005/08/09 15:47:00 $
+$Revision: 0.71 $ $Date: 2005/08/19 06:11:26 $
+! bin/psync
+  Addressed: #!/usr/local/bin/perl missing, causing unsuable 
+  script being installed.  Ouch!
+  Message-Id: <9E018196-A9C6-4F0F-B5D9-6236CD358928@ppp.bekkoame.ne.jp>
+! bin/psync
+  POD fixes by Jean-Louis Fuchs
+  Message-Id: <42F8E601.60108@fangorn.ch>
+
+0.70  2005/08/09 15:47:00
 + t/AskGetFileInfo.pm
 ! t/catalog.t t/info.t
   Modified so it passes under Tiger.

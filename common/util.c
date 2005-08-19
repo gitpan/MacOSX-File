@@ -1,5 +1,5 @@
 /*
- * $Id: util.c,v 0.70 2005/08/09 15:47:00 dankogai Exp dankogai $
+ * $Id: util.c,v 0.70 2005/08/09 15:47:00 dankogai Exp $
  */
 
 #ifndef _INC_UTIL_C_

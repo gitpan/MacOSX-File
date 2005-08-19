@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         MacOSX-File
-version:      0.70
+version:      0.71
 version_from: File.pm
 installdirs:  site
 requires:
